@@ -60,6 +60,16 @@ export const api = {
     apiClient.get<{ success: boolean; url?: string; error?: string; requiredEnv?: string[] }>(
       `/auth/oauth/${provider}/url`
     ),
+  forgotPassword: (email: string) =>
+    apiClient.post<{ success: boolean; message: string; notice?: string; emailDeliveryConfigured?: boolean; resetTokenPreview?: string; error?: string }>(
+      '/auth/forgot-password',
+      { email }
+    ),
+  resetPassword: (data: { token: string; newPassword: string }) =>
+    apiClient.post<{ success: boolean; message: string; error?: string }>(
+      '/auth/reset-password',
+      data
+    ),
 
 
   // Resumes

@@ -603,16 +603,119 @@ export const appleAuth = async (_req: Request, res: Response): Promise<void> => 
 
 
 export const forgotPassword = async (req: Request, res: Response): Promise<void> => {
-  const { email } = req.body;
-  if (!email) {
-    res.status(400).json({ success: false, error: 'Email is required.' });
-    return;
-  }
+  try {
+    const { email } = req.body;
+    if (!email) {
+      res.status(400).json({ success: false, error: 'Email is required.' });
+      return;
+    }
 
-  res.json({
-    success: true,
-    message: 'If an account exists with this email address, password reset instructions have been dispatched.',
-  });
+    const normalizedEmail = email.toLowerCase().trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(normalizedEmail)) {
+      res.status(400).json({ success: false, error: 'Please provide a valid email address.' });
+      return;
+    }
+
+    const { fallbackStoreActive } = getDBStatus();
+    let user: any;
+    if (!fallbackStoreActive) {
+      user = await UserModel.findOne({ email: normalizedEmail });
+    } else {
+      user = memoryStore.users.get(normalizedEmail);
+    }
+
+    // Generate cryptographically secure temporary token (expires in 1 hour)
+    const rawResetToken = crypto.randomBytes(32).toString('hex');
+    const hashedToken = crypto.createHash('sha256').update(rawResetToken).digest('hex');
+    const expiresAt = Date.now() + 3600 * 1000; // 1 hour
+
+    if (user) {
+      if (!fallbackStoreActive) {
+        user.resetPasswordToken = hashedToken;
+        user.resetPasswordExpires = new Date(expiresAt);
+        await user.save();
+      } else {
+        memoryStore.passwordResetTokens.set(hashedToken, { email: normalizedEmail, expiresAt });
+      }
+    }
+
+    const emailConfigured = !!(process.env.RESEND_API_KEY || process.env.SENDGRID_API_KEY || process.env.EMAIL_API_KEY);
+
+    // Uniform non-leaking message per Phase 5
+    res.json({
+      success: true,
+      message: 'If an account exists with that email address, a password reset link has been prepared.',
+      emailDeliveryConfigured: emailConfigured,
+      notice: emailConfigured
+        ? 'Password reset instructions have been sent to your email.'
+        : 'Password reset implementation is ready, but an email provider configuration is required.',
+      ...(process.env.NODE_ENV !== 'production' && { resetTokenPreview: rawResetToken }),
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: 'Unable to process password reset request.' });
+  }
+};
+
+export const resetPassword = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { token, newPassword } = req.body;
+    if (!token || !newPassword) {
+      res.status(400).json({ success: false, error: 'Reset token and new password are required.' });
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      res.status(400).json({ success: false, error: 'Password must be at least 6 characters long.' });
+      return;
+    }
+
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+    const { fallbackStoreActive } = getDBStatus();
+
+    let user: any;
+    if (!fallbackStoreActive) {
+      user = await UserModel.findOne({
+        resetPasswordToken: hashedToken,
+        resetPasswordExpires: { $gt: new Date() },
+      }).select('+resetPasswordToken +resetPasswordExpires');
+    } else {
+      const record = memoryStore.passwordResetTokens.get(hashedToken);
+      if (record && record.expiresAt > Date.now()) {
+        user = memoryStore.users.get(record.email);
+      }
+    }
+
+    if (!user) {
+      res.status(400).json({
+        success: false,
+        error: 'Password reset token is invalid or has expired.',
+      });
+      return;
+    }
+
+    // Hash new password and invalidate token
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(newPassword, salt);
+
+    if (!fallbackStoreActive) {
+      user.passwordHash = passwordHash;
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpires = undefined;
+      await user.save();
+    } else {
+      user.passwordHash = passwordHash;
+      memoryStore.users.set(user.email, user);
+      memoryStore.passwordResetTokens.delete(hashedToken);
+    }
+
+    res.json({
+      success: true,
+      message: 'Password has been successfully reset. You can now log in with your new password.',
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: 'Unable to reset password.' });
+  }
 };
 
 

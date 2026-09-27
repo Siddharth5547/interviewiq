@@ -11,6 +11,7 @@ import {
   appleAuth,
   appleOAuthCallback,
   forgotPassword,
+  resetPassword,
 } from '../controllers/authController.js';
 import { authenticateToken } from '../middleware/auth.js';
 
@@ -29,6 +30,7 @@ router.post('/oauth/apple/callback', appleOAuthCallback);
 router.post('/oauth/google', googleAuth);
 router.post('/oauth/apple', appleAuth);
 router.post('/forgot-password', forgotPassword);
+router.post('/reset-password', resetPassword);
 
 export default router;
 

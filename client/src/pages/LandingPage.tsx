@@ -41,7 +41,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
               </h1>
 
               <p className="text-lg sm:text-xl text-[#6B756D] leading-relaxed max-w-xl mx-auto lg:mx-0">
-                InterviewIQ analyzes your resume, checks ATS compatibility, surfaces relevant opportunities, improves your application, and runs personalized AI interviews based on your resume and target job.
+                From your resume to your next interview, InterviewIQ helps you understand your fit, improve your resume, discover opportunities, and practice with an AI interviewer.
               </p>
 
               <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">

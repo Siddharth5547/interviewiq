@@ -9,6 +9,8 @@ export interface IUser extends Document {
   googleId?: string;
   appleId?: string;
   avatarUrl?: string;
+  resetPasswordToken?: string;
+  resetPasswordExpires?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -23,6 +25,8 @@ const UserSchema: Schema = new Schema(
     googleId: { type: String, sparse: true },
     appleId: { type: String, sparse: true },
     avatarUrl: { type: String },
+    resetPasswordToken: { type: String, select: false },
+    resetPasswordExpires: { type: Date, select: false },
   },
   { timestamps: true }
 );
