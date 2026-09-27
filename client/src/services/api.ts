@@ -42,6 +42,13 @@ export const api = {
   getMe: () => apiClient.get<{ success: boolean; user: User }>('/auth/me'),
   quickDemoLogin: () =>
     apiClient.post<{ success: boolean; token: string; user: User }>('/auth/demo-login'),
+  getOAuthStatus: () =>
+    apiClient.get<{ success: boolean; google: any; apple: any }>('/auth/oauth/status'),
+  getOAuthUrl: (provider: string) =>
+    apiClient.get<{ success: boolean; url?: string; error?: string; requiredEnv?: string[] }>(
+      `/auth/oauth/${provider}/url`
+    ),
+
 
   // Resumes
   uploadResume: (formData: FormData) =>

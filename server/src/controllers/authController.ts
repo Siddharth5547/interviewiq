@@ -180,12 +180,68 @@ export const getOAuthStatus = async (_req: Request, res: Response): Promise<void
     google: {
       configured: !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET),
       clientId: process.env.GOOGLE_CLIENT_ID ? process.env.GOOGLE_CLIENT_ID.substring(0, 12) + '...' : null,
+      requiredEnv: ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'GOOGLE_REDIRECT_URI'],
     },
     apple: {
       configured: !!(process.env.APPLE_CLIENT_ID && process.env.APPLE_CLIENT_SECRET),
       clientId: process.env.APPLE_CLIENT_ID ? process.env.APPLE_CLIENT_ID.substring(0, 12) + '...' : null,
+      requiredEnv: ['APPLE_CLIENT_ID', 'APPLE_TEAM_ID', 'APPLE_KEY_ID', 'APPLE_PRIVATE_KEY', 'APPLE_REDIRECT_URI'],
     },
   });
+};
+
+export const getOAuthUrl = async (req: Request, res: Response): Promise<void> => {
+  const provider = (req.params.provider || '').toLowerCase();
+
+  if (provider === 'google') {
+    const clientId = process.env.GOOGLE_CLIENT_ID;
+    const redirectUri = process.env.GOOGLE_REDIRECT_URI || `${process.env.SERVER_URL || 'http://localhost:5000'}/api/auth/oauth/google/callback`;
+
+    if (!clientId || !process.env.GOOGLE_CLIENT_SECRET) {
+      res.status(501).json({
+        success: false,
+        error: 'Google OAuth is not configured. Required server variables: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and GOOGLE_REDIRECT_URI.',
+        code: 'OAUTH_NOT_CONFIGURED',
+        requiredEnv: ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'GOOGLE_REDIRECT_URI'],
+      });
+      return;
+    }
+
+    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(
+      clientId
+    )}&redirect_uri=${encodeURIComponent(
+      redirectUri
+    )}&response_type=code&scope=openid%20email%20profile&access_type=offline&prompt=consent`;
+
+    res.json({ success: true, url: authUrl });
+    return;
+  }
+
+  if (provider === 'apple') {
+    const clientId = process.env.APPLE_CLIENT_ID;
+    const redirectUri = process.env.APPLE_REDIRECT_URI || `${process.env.SERVER_URL || 'http://localhost:5000'}/api/auth/oauth/apple/callback`;
+
+    if (!clientId || !process.env.APPLE_CLIENT_SECRET) {
+      res.status(501).json({
+        success: false,
+        error: 'Apple Sign-In is not configured. Required server variables: APPLE_CLIENT_ID, APPLE_TEAM_ID, APPLE_KEY_ID, APPLE_PRIVATE_KEY, and APPLE_REDIRECT_URI.',
+        code: 'OAUTH_NOT_CONFIGURED',
+        requiredEnv: ['APPLE_CLIENT_ID', 'APPLE_TEAM_ID', 'APPLE_KEY_ID', 'APPLE_PRIVATE_KEY', 'APPLE_REDIRECT_URI'],
+      });
+      return;
+    }
+
+    const authUrl = `https://appleid.apple.com/auth/authorize?client_id=${encodeURIComponent(
+      clientId
+    )}&redirect_uri=${encodeURIComponent(
+      redirectUri
+    )}&response_type=code%20id_token&scope=name%20email&response_mode=form_post`;
+
+    res.json({ success: true, url: authUrl });
+    return;
+  }
+
+  res.status(400).json({ success: false, error: 'Unsupported OAuth provider.' });
 };
 
 export const googleAuth = async (req: Request, res: Response): Promise<void> => {
@@ -195,8 +251,9 @@ export const googleAuth = async (req: Request, res: Response): Promise<void> => 
   if (!clientId || !process.env.GOOGLE_CLIENT_SECRET) {
     res.status(501).json({
       success: false,
-      error: 'Google OAuth is not configured. Please supply GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in your server environment.',
+      error: 'Google OAuth is not configured. Please supply GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and GOOGLE_REDIRECT_URI in server/.env.',
       code: 'OAUTH_NOT_CONFIGURED',
+      requiredEnv: ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'GOOGLE_REDIRECT_URI'],
     });
     return;
   }
@@ -209,7 +266,7 @@ export const googleAuth = async (req: Request, res: Response): Promise<void> => 
     return;
   }
 
-  // When credentials are provided, verify the Google JWT or handle exchange
+  // Token exchange verification logic
   res.status(501).json({
     success: false,
     error: 'Google credential verification endpoint ready. Waiting for live Google verification callback.',
@@ -221,8 +278,9 @@ export const appleAuth = async (_req: Request, res: Response): Promise<void> => 
   if (!clientId || !process.env.APPLE_CLIENT_SECRET) {
     res.status(501).json({
       success: false,
-      error: 'Apple Sign-In is not configured. Please supply APPLE_CLIENT_ID and APPLE_CLIENT_SECRET in your server environment.',
+      error: 'Apple Sign-In is not configured. Please supply APPLE_CLIENT_ID, APPLE_TEAM_ID, APPLE_KEY_ID, APPLE_PRIVATE_KEY, and APPLE_REDIRECT_URI in server/.env.',
       code: 'OAUTH_NOT_CONFIGURED',
+      requiredEnv: ['APPLE_CLIENT_ID', 'APPLE_TEAM_ID', 'APPLE_KEY_ID', 'APPLE_PRIVATE_KEY', 'APPLE_REDIRECT_URI'],
     });
     return;
   }
@@ -232,6 +290,7 @@ export const appleAuth = async (_req: Request, res: Response): Promise<void> => 
     error: 'Apple Sign-In endpoint ready.',
   });
 };
+
 
 export const forgotPassword = async (req: Request, res: Response): Promise<void> => {
   const { email } = req.body;

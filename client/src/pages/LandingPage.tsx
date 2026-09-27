@@ -3,18 +3,19 @@ import {
   Sparkles,
   ArrowRight,
   ShieldCheck,
-  Target,
-  Mic,
+  Brain,
   FileCheck2,
-  CheckCircle2,
-  BrainCircuit,
-  Award,
-  Layers,
   FileText,
-  Volume2,
-  Play,
+  Briefcase,
+  Layers,
+  Mic,
   TrendingUp,
+  CheckCircle2,
+  AlertCircle,
+  Clock,
+  Compass,
 } from 'lucide-react';
+import { AnimatedWorkflowSection } from '../components/AnimatedWorkflowSection.js';
 
 interface LandingPageProps {
   onNavigate: (tab: string) => void;
@@ -23,8 +24,8 @@ interface LandingPageProps {
 export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
   return (
     <div className="min-h-screen bg-[#F4F7F1] text-[#1F2A22] selection:bg-[#D4E2C5] overflow-x-hidden">
-      {/* Hero Section */}
-      <section className="relative pt-16 pb-24 md:pt-28 md:pb-36 sage-gradient-hero">
+      {/* 1. HERO SECTION */}
+      <section className="relative pt-16 pb-20 md:pt-24 md:pb-32 sage-gradient-hero">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
             {/* Left: Large Cinematic Copy */}
@@ -40,122 +41,120 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
               </h1>
 
               <p className="text-lg sm:text-xl text-[#6B756D] leading-relaxed max-w-xl mx-auto lg:mx-0">
-                Analyze your resume, check ATS compatibility, match your resume with a target job,
-                and practice personalized AI interviews based on your actual experience.
+                InterviewIQ analyzes your resume, checks ATS compatibility, surfaces relevant opportunities, improves your application, and runs personalized AI interviews based on your resume and target job.
               </p>
 
               <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
                 <button
-                  onClick={() => onNavigate('interview')}
+                  onClick={() => onNavigate('signup')}
                   className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-[#344E41] text-white font-bold text-sm shadow-premium hover:bg-[#4B6B5B] transition-all hover:scale-[1.02]"
                 >
-                  Start Your Interview <ArrowRight className="w-4 h-4" />
+                  Get Started <ArrowRight className="w-4 h-4" />
                 </button>
 
                 <button
-                  onClick={() => onNavigate('resume')}
+                  onClick={() => {
+                    document.getElementById('how-it-works-section')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
                   className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-white text-[#1F2A22] font-semibold text-sm border border-[rgba(52,78,65,0.14)] shadow-soft hover:bg-[#E5EEDC]/40 transition-all hover:scale-[1.02]"
                 >
-                  Analyze My Resume
+                  See How It Works
                 </button>
               </div>
 
+              {/* Verified Trust Tokens */}
               <div className="pt-4 flex flex-wrap items-center justify-center lg:justify-start gap-6 text-xs text-[#6B756D]">
                 <span className="flex items-center gap-1.5 font-medium">
                   <ShieldCheck className="w-4 h-4 text-[#6B8E5A]" /> Zero Data Fabrication
                 </span>
                 <span className="flex items-center gap-1.5 font-medium">
-                  <BrainCircuit className="w-4 h-4 text-[#6B8E5A]" /> Adaptive State Machine
+                  <Brain className="w-4 h-4 text-[#6B8E5A]" /> Adaptive State Machine
                 </span>
                 <span className="flex items-center gap-1.5 font-medium">
-                  <FileCheck2 className="w-4 h-4 text-[#6B8E5A]" /> Grounded ATS Scoring
+                  <FileCheck2 className="w-4 h-4 text-[#6B8E5A]" /> Safe ATS Matcher
                 </span>
               </div>
             </div>
 
-            {/* Right: Large Realistic Product Preview */}
+            {/* Right: Visual Product Preview (Resume → ATS → Job Match → AI Interview → Application Tracking) */}
             <div className="lg:col-span-6 relative">
-              {/* Soft sage glow behind preview */}
               <div className="absolute -inset-4 bg-[#8FAF78]/15 rounded-3xl blur-2xl pointer-events-none" />
 
-              <div className="relative bg-white/95 backdrop-blur-md rounded-3xl border border-[rgba(52,78,65,0.12)] shadow-[0_30px_70px_-15px_rgba(52,78,65,0.18)] p-6 sm:p-7 space-y-5">
-                {/* Header of Mock Window */}
-                <div className="flex items-center justify-between pb-4 border-b border-[rgba(52,78,65,0.08)]">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-[#344E41] text-white flex items-center justify-center font-bold text-xs">
+              <div className="relative bg-white rounded-3xl border border-[rgba(52,78,65,0.12)] shadow-[0_30px_70px_-15px_rgba(52,78,65,0.16)] p-6 sm:p-7 space-y-4">
+                {/* Header ribbon */}
+                <div className="flex items-center justify-between pb-3 border-b border-[rgba(52,78,65,0.08)]">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-full bg-[#344E41] text-white flex items-center justify-center font-bold text-xs">
                       IQ
                     </div>
                     <div>
-                      <h4 className="text-xs font-bold text-[#1F2A22]">AI Technical Mock Interview</h4>
-                      <p className="text-[11px] text-[#6B756D]">Full Stack Software Engineer • Live Session</p>
+                      <span className="text-xs font-bold text-[#1F2A22] block">Career Prep Pipeline</span>
+                      <span className="text-[10px] text-[#6B756D]">End-to-End Verified Flow</span>
                     </div>
                   </div>
-
-                  {/* Large 84 ATS Score Badge */}
-                  <div className="flex items-center gap-2 bg-[#E5EEDC] px-3.5 py-1.5 rounded-full border border-[rgba(52,78,65,0.1)]">
-                    <span className="text-sm font-extrabold text-[#344E41]">84</span>
-                    <span className="text-[10px] uppercase font-bold text-[#6B8E5A] tracking-wider">ATS Score</span>
-                  </div>
+                  <span className="text-[11px] font-bold px-3 py-1 bg-[#E5EEDC] text-[#344E41] rounded-full">
+                    Live Session Preview
+                  </span>
                 </div>
 
-                {/* Question & Avatar Preview */}
-                <div className="p-4 bg-[#F4F7F1] rounded-2xl border border-[rgba(52,78,65,0.06)] space-y-3">
+                {/* Pipeline visual chain: Resume → ATS → Job Match → AI Interview → Application Tracking */}
+                <div className="grid grid-cols-5 gap-1.5 py-1 text-center text-[10px] font-bold">
+                  {[
+                    { label: 'Resume', active: true },
+                    { label: 'ATS', active: true },
+                    { label: 'Job Match', active: true },
+                    { label: 'Interview', active: true },
+                    { label: 'Tracking', active: true },
+                  ].map((step, idx) => (
+                    <div
+                      key={idx}
+                      className={`p-1.5 rounded-lg border ${
+                        step.active
+                          ? 'bg-[#E5EEDC] border-[#6B8E5A]/30 text-[#344E41]'
+                          : 'bg-gray-50 border-gray-100 text-gray-400'
+                      }`}
+                    >
+                      {step.label}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Simulated Interview Dialogue Card */}
+                <div className="p-3.5 bg-[#F4F7F1] rounded-2xl border border-[rgba(52,78,65,0.06)] space-y-2">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-[#6B8E5A] animate-ping" />
-                      <span className="text-[11px] font-bold text-[#344E41] uppercase tracking-wider">
-                        Interviewer Speaking
-                      </span>
-                    </div>
-                    <span className="text-[11px] font-semibold text-[#6B756D]">Question 3 of 7</span>
+                    <span className="text-[10px] font-bold text-[#6B8E5A] uppercase tracking-wider">
+                      AI Interviewer • Technical Round
+                    </span>
+                    <span className="text-[10px] text-[#6B756D]">Question 2 of 5</span>
                   </div>
-
-                  <p className="text-sm font-medium text-[#1F2A22] leading-relaxed">
-                    "I see from your resume that you built <strong>CampusIQ</strong> using React and Node.js.
-                    Can you walk me through how you structured your API middleware and role-based authentication?"
+                  <p className="text-xs font-medium text-[#1F2A22] leading-relaxed">
+                    "You listed <strong>PostgreSQL</strong> and <strong>MongoDB</strong> in your projects. How did you choose between them for the user profile store, and how did you approach database migrations?"
                   </p>
                 </div>
 
-                {/* Candidate Answer Box with Waveform */}
-                <div className="p-4 bg-white rounded-2xl border border-[rgba(52,78,65,0.12)] space-y-3">
-                  <div className="flex items-center justify-between text-xs text-[#6B756D]">
-                    <span className="font-semibold text-[#1F2A22]">Candidate Response (Speech-to-Text)</span>
-                    <span className="text-[11px] text-[#6B8E5A] font-bold">● Listening</span>
+                {/* Simulated Candidate Audio & STT */}
+                <div className="p-3 bg-white rounded-2xl border border-[rgba(52,78,65,0.1)] space-y-2">
+                  <div className="flex items-center justify-between text-[11px]">
+                    <span className="font-semibold text-[#1F2A22]">Candidate Speech-to-Text</span>
+                    <span className="text-[10px] text-[#6B8E5A] font-bold">● Transcribing</span>
                   </div>
-
-                  <p className="text-xs text-[#1F2A22] italic leading-relaxed">
-                    "In CampusIQ, we implemented JWT tokens in HttpOnly cookies, validated permissions via Express
-                    middleware, and hashed passwords with bcrypt..."
+                  <p className="text-[11px] text-[#6B756D] italic leading-tight">
+                    "We selected PostgreSQL for strong ACID guarantees around user auth and relational billing records..."
                   </p>
-
-                  {/* Audio wave frequency visualizer */}
                   <div className="flex items-center justify-between pt-1">
                     <div className="flex items-center gap-1">
-                      {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                      {[12, 22, 16, 26, 14, 20, 10].map((h, i) => (
                         <div
                           key={i}
-                          className={`w-1 rounded-full bg-[#6B8E5A] animate-soundwave-${(i % 5) + 1}`}
-                          style={{ height: `${(i % 4) * 5 + 8}px` }}
+                          className="w-1 bg-[#6B8E5A] rounded-full"
+                          style={{ height: `${h}px` }}
                         />
                       ))}
                     </div>
-
-                    <button
-                      onClick={() => onNavigate('interview')}
-                      className="px-3.5 py-1.5 rounded-full bg-[#344E41] text-white text-[11px] font-bold hover:bg-[#4B6B5B] transition-colors"
-                    >
-                      Submit Answer →
-                    </button>
+                    <span className="text-[10px] font-bold text-[#344E41] bg-[#E5EEDC] px-2 py-0.5 rounded-full">
+                      88% Evaluated
+                    </span>
                   </div>
-                </div>
-
-                {/* Instant Evaluation Feedback Preview */}
-                <div className="p-3 bg-[#E5EEDC]/80 rounded-xl border border-[rgba(52,78,65,0.08)] flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2 text-[#344E41] font-semibold">
-                    <CheckCircle2 className="w-4 h-4 text-[#6B8E5A]" />
-                    <span>Evaluation: <strong>Correct (92%)</strong></span>
-                  </div>
-                  <span className="text-[11px] text-[#6B756D]">Follow-up: Advanced Redis Caching</span>
                 </div>
               </div>
             </div>
@@ -163,292 +162,295 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
         </div>
       </section>
 
-      {/* Storytelling Workflow Section (120px Vertical Spacing) */}
-      <section id="how-it-works-section" className="py-24 md:py-32 bg-white border-y border-[rgba(52,78,65,0.08)]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-20">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#6B8E5A]">Architecture Flow</span>
+      {/* 2. EVERYTHING YOU NEED TO PREPARE (6 Capability Blocks) */}
+      <section className="py-24 md:py-32 bg-white border-y border-[rgba(52,78,65,0.08)]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-16 md:mb-20">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#6B8E5A]">Core Modules</span>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-[#1F2A22] mt-2 font-display">
-              Your Resume Becomes Your <br />
-              <span className="text-[#6B8E5A]">Interview Blueprint</span>
+              Everything You Need to Prepare
             </h2>
             <p className="text-base sm:text-lg text-[#6B756D] mt-3">
-              No generic prompt templates. Every question and rubric is derived through an end-to-end semantic pipeline.
+              Six interconnected capability blocks engineered to guide you from initial resume upload to receiving job offers.
             </p>
           </div>
 
-          {/* Timeline / Visual Flow Layout */}
-          <div className="relative">
-            {/* Central connecting line for desktop */}
-            <div className="hidden md:block absolute left-1/2 top-4 bottom-4 w-0.5 bg-[#D4E2C5] -translate-x-1/2" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {/* Block 1: Resume Intelligence */}
+            <div className="p-8 rounded-3xl bg-[#F4F7F1] border border-[rgba(52,78,65,0.08)] space-y-4 hover:border-[#6B8E5A]/40 transition-colors">
+              <div className="w-12 h-12 rounded-2xl bg-[#344E41] text-white flex items-center justify-center">
+                <FileText className="w-6 h-6 text-[#D4E2C5]" />
+              </div>
+              <h3 className="text-xl font-bold text-[#1F2A22] font-display">Resume Intelligence</h3>
+              <p className="text-xs sm:text-sm text-[#6B756D] leading-relaxed">
+                Build your verified AI candidate profile. Parse PDF, DOCX, and TXT files without inventing unearned credentials or missing fields.
+              </p>
+              <button
+                onClick={() => onNavigate('resume')}
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-[#344E41] hover:text-[#6B8E5A] transition-colors pt-2"
+              >
+                Analyze Resume <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
 
-            <div className="space-y-12 md:space-y-16">
-              {[
-                {
-                  step: '01',
-                  badge: 'Input',
-                  title: 'Raw Resume Parsing',
-                  desc: 'We extract skills, projects, work experience, and credentials from PDF/DOCX files into structured entities.',
-                  side: 'left',
-                },
-                {
-                  step: '02',
-                  badge: 'Intelligence',
-                  title: 'Semantic Domain Mapping',
-                  desc: 'Beyond plain text: we map tools like React, Node, and MongoDB into architectural domains (Full-stack Web, APIs, Auth).',
-                  side: 'right',
-                },
-                {
-                  step: '03',
-                  badge: 'Comparison',
-                  title: 'ATS & Job Matching',
-                  desc: 'Compare against the target job description to compute an estimated 0-100 compatibility score and missing keywords.',
-                  side: 'left',
-                },
-                {
-                  step: '04',
-                  badge: 'Enhancement',
-                  title: 'Grounded Resume Improvement',
-                  desc: 'Elevate bullet points using Google’s STAR/XYZ formula without inventing fake metrics or unearned skills.',
-                  side: 'right',
-                },
-                {
-                  step: '05',
-                  badge: 'Simulation',
-                  title: 'Personalized AI Interview',
-                  desc: 'Face an adaptive interviewer who probes your actual architecture, asks project deep-dives, and dynamically adapts difficulty.',
-                  side: 'left',
-                },
-                {
-                  step: '06',
-                  badge: 'Diagnostic',
-                  title: 'Interview Report & Reality Check',
-                  desc: 'Receive 7-pillar competency scoring, question rubrics, and contrast paper claims with live interview demonstration.',
-                  side: 'right',
-                },
-              ].map((item, idx) => {
-                const isLeft = item.side === 'left';
-                return (
-                  <div
-                    key={idx}
-                    className={`relative flex flex-col md:flex-row items-center ${
-                      isLeft ? 'md:flex-row-reverse' : ''
-                    } gap-8`}
-                  >
-                    {/* Content Box */}
-                    <div className="w-full md:w-1/2 p-6 sm:p-8 bg-[#F4F7F1] rounded-3xl border border-[rgba(52,78,65,0.08)] shadow-soft">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-bold uppercase tracking-wider text-[#6B8E5A]">
-                          {item.badge}
-                        </span>
-                        <span className="text-xl font-extrabold text-[#D4E2C5] font-display">{item.step}</span>
-                      </div>
-                      <h3 className="text-xl font-bold text-[#1F2A22] mb-2 font-display">{item.title}</h3>
-                      <p className="text-sm text-[#6B756D] leading-relaxed">{item.desc}</p>
-                    </div>
+            {/* Block 2: ATS Analysis */}
+            <div className="p-8 rounded-3xl bg-[#F4F7F1] border border-[rgba(52,78,65,0.08)] space-y-4 hover:border-[#6B8E5A]/40 transition-colors">
+              <div className="w-12 h-12 rounded-2xl bg-[#344E41] text-white flex items-center justify-center">
+                <FileCheck2 className="w-6 h-6 text-[#D4E2C5]" />
+              </div>
+              <h3 className="text-xl font-bold text-[#1F2A22] font-display">ATS Analysis</h3>
+              <p className="text-xs sm:text-sm text-[#6B756D] leading-relaxed">
+                Compare your resume to target job descriptions using safe regex matching for C++, .NET, Node.js, and REST APIs without crash errors.
+              </p>
+              <button
+                onClick={() => onNavigate('ats')}
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-[#344E41] hover:text-[#6B8E5A] transition-colors pt-2"
+              >
+                Check ATS Score <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
 
-                    {/* Central Indicator Node */}
-                    <div className="hidden md:flex w-10 h-10 rounded-full bg-[#344E41] text-white items-center justify-center font-bold text-xs shadow-md z-10">
-                      {idx + 1}
-                    </div>
+            {/* Block 3: Opportunity Discovery */}
+            <div className="p-8 rounded-3xl bg-[#F4F7F1] border border-[rgba(52,78,65,0.08)] space-y-4 hover:border-[#6B8E5A]/40 transition-colors">
+              <div className="w-12 h-12 rounded-2xl bg-[#344E41] text-white flex items-center justify-center">
+                <Compass className="w-6 h-6 text-[#D4E2C5]" />
+              </div>
+              <h3 className="text-xl font-bold text-[#1F2A22] font-display">Opportunity Discovery</h3>
+              <p className="text-xs sm:text-sm text-[#6B756D] leading-relaxed">
+                Find relevant verified technology jobs and internships with estimated resume match rates, required skills, and direct apply links.
+              </p>
+              <button
+                onClick={() => onNavigate('opportunities')}
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-[#344E41] hover:text-[#6B8E5A] transition-colors pt-2"
+              >
+                Browse Opportunities <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
 
-                    {/* Spacer for other side */}
-                    <div className="hidden md:block w-1/2" />
-                  </div>
-                );
-              })}
+            {/* Block 4: Resume Improvement */}
+            <div className="p-8 rounded-3xl bg-[#F4F7F1] border border-[rgba(52,78,65,0.08)] space-y-4 hover:border-[#6B8E5A]/40 transition-colors">
+              <div className="w-12 h-12 rounded-2xl bg-[#344E41] text-white flex items-center justify-center">
+                <Sparkles className="w-6 h-6 text-[#D4E2C5]" />
+              </div>
+              <h3 className="text-xl font-bold text-[#1F2A22] font-display">Resume Improvement</h3>
+              <p className="text-xs sm:text-sm text-[#6B756D] leading-relaxed">
+                Optimize your bullet points for a target role using Google's XYZ formula without altering your real background or hallucinating metrics.
+              </p>
+              <button
+                onClick={() => onNavigate('improve')}
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-[#344E41] hover:text-[#6B8E5A] transition-colors pt-2"
+              >
+                Improve Resume <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            {/* Block 5: AI Interviews */}
+            <div className="p-8 rounded-3xl bg-[#F4F7F1] border border-[rgba(52,78,65,0.08)] space-y-4 hover:border-[#6B8E5A]/40 transition-colors">
+              <div className="w-12 h-12 rounded-2xl bg-[#344E41] text-white flex items-center justify-center">
+                <Mic className="w-6 h-6 text-[#D4E2C5]" />
+              </div>
+              <h3 className="text-xl font-bold text-[#1F2A22] font-display">AI Interviews</h3>
+              <p className="text-xs sm:text-sm text-[#6B756D] leading-relaxed">
+                Practice text or voice mock interviews across 7 tracks and 5 personality modes with dynamic follow-ups based on actual answer strength.
+              </p>
+              <button
+                onClick={() => onNavigate('interview')}
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-[#344E41] hover:text-[#6B8E5A] transition-colors pt-2"
+              >
+                Launch Mock Room <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            {/* Block 6: Application Tracking */}
+            <div className="p-8 rounded-3xl bg-[#F4F7F1] border border-[rgba(52,78,65,0.08)] space-y-4 hover:border-[#6B8E5A]/40 transition-colors">
+              <div className="w-12 h-12 rounded-2xl bg-[#344E41] text-white flex items-center justify-center">
+                <Layers className="w-6 h-6 text-[#D4E2C5]" />
+              </div>
+              <h3 className="text-xl font-bold text-[#1F2A22] font-display">Application Tracking</h3>
+              <p className="text-xs sm:text-sm text-[#6B756D] leading-relaxed">
+                Track where you applied across an 8-stage recruitment pipeline, record interviewer feedback, and monitor your recruitment funnel.
+              </p>
+              <button
+                onClick={() => onNavigate('applications')}
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-[#344E41] hover:text-[#6B8E5A] transition-colors pt-2"
+              >
+                Open Tracker <ArrowRight className="w-3.5 h-3.5" />
+              </button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Large Alternating Feature Sections (120px Vertical Spacing) */}
-      <section id="features-section" className="py-24 md:py-32 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-28 md:space-y-36">
-        {/* Feature 1: Resume Intelligence */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          <div className="lg:col-span-6 space-y-6">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#6B8E5A]">Semantic Understanding</span>
-            <h3 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-[#1F2A22] leading-tight font-display">
-              We Understand What <br />
-              Your Stack Means
-            </h3>
-            <p className="text-base text-[#6B756D] leading-relaxed">
-              Generic parsers treat "React" and "PostgreSQL" as disconnected keywords. InterviewIQ understands the
-              higher-order software engineering competencies they represent: Single Page Architecture, Relational Data
-              Modeling, and Stateless Session Handling.
+      {/* 3. HOW INTERVIEWIO WORKS (12-Step Animated Workflow Section - §17 Spec) */}
+      <AnimatedWorkflowSection onNavigate={onNavigate} />
+
+      {/* 4. LARGE PRODUCT PREVIEW SECTION */}
+      <section className="py-24 md:py-32 bg-[#F4F7F1]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#6B8E5A]">Unified Workspace</span>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-[#1F2A22] mt-2 font-display">
+              One Unified Career Preparation Engine
+            </h2>
+            <p className="text-base sm:text-lg text-[#6B756D] mt-3">
+              See your resume compatibility score, matched jobs, skill gaps, real interview questions, and active application statuses in one coherent view.
             </p>
-            <ul className="space-y-3 text-sm text-[#1F2A22]">
-              <li className="flex items-center gap-2.5">
-                <CheckCircle2 className="w-5 h-5 text-[#6B8E5A] flex-shrink-0" />
-                <span>Understands relationships between frontend, backend, and cloud architectures</span>
-              </li>
-              <li className="flex items-center gap-2.5">
-                <CheckCircle2 className="w-5 h-5 text-[#6B8E5A] flex-shrink-0" />
-                <span>Normalizes terminology (e.g. React.js, ReactJS, Next.js synergies)</span>
-              </li>
-              <li className="flex items-center gap-2.5">
-                <CheckCircle2 className="w-5 h-5 text-[#6B8E5A] flex-shrink-0" />
-                <span>Structures extracted projects into actionable interview topics</span>
-              </li>
-            </ul>
           </div>
 
-          <div className="lg:col-span-6 p-8 bg-white rounded-3xl border border-[rgba(52,78,65,0.1)] shadow-premium space-y-4">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#6B756D]">Inferred Competency Map</span>
-            <div className="flex flex-wrap gap-2 pt-2">
-              {[
-                'Full-stack Web Engineering',
-                'REST API Architecture',
-                'Database Data Modeling',
-                'Authentication & Security (JWT)',
-                'Performance Tuning',
-                'Containerization & Docker',
-              ].map((domain, i) => (
-                <span
-                  key={i}
-                  className="px-3.5 py-2 rounded-xl bg-[#E5EEDC] text-[#344E41] font-semibold text-xs border border-[rgba(52,78,65,0.08)]"
-                >
-                  ✓ {domain}
-                </span>
-              ))}
-            </div>
-            <div className="p-4 bg-[#F4F7F1] rounded-2xl border border-[rgba(52,78,65,0.06)] text-xs text-[#6B756D]">
-              <strong>Project Synergy:</strong> CampusIQ → Synthesizes Full-stack Web, Role-Based Access Control, and
-              Document Store Design.
-            </div>
-          </div>
-        </div>
-
-        {/* Feature 2: ATS Analysis (Large 84 Score Visualization) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          <div className="lg:col-span-6 lg:order-2 space-y-6">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#6B8E5A]">Compatibility Engine</span>
-            <h3 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-[#1F2A22] leading-tight font-display">
-              Estimated ATS Compatibility <br />
-              Without False Promises
-            </h3>
-            <p className="text-base text-[#6B756D] leading-relaxed">
-              We provide a transparent 9-point compatibility analysis comparing your resume against real job descriptions.
-              We never claim a score guarantees employer hiring—we provide honest, actionable insights.
-            </p>
-            <button
-              onClick={() => onNavigate('ats')}
-              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-[#344E41] text-white font-bold text-xs hover:bg-[#4B6B5B] transition-all shadow-sm"
-            >
-              Analyze Your Job Match <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
-
-          <div className="lg:col-span-6 lg:order-1 p-8 bg-white rounded-3xl border border-[rgba(52,78,65,0.1)] shadow-premium">
-            <div className="flex flex-col sm:flex-row items-center gap-8 mb-6 pb-6 border-b border-[rgba(52,78,65,0.08)]">
-              <div className="text-center">
-                <span className="text-6xl font-black text-[#344E41] font-display">84</span>
-                <span className="text-xs uppercase font-extrabold text-[#6B8E5A] tracking-wider block mt-1">
-                  ATS Score
-                </span>
-              </div>
-              <div className="text-center sm:text-left space-y-1">
-                <h4 className="text-base font-bold text-[#1F2A22]">Full Stack Software Engineer</h4>
-                <p className="text-xs text-[#6B756D]">Stripe & Co. Labs • High Match</p>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              {[
-                { label: 'Keyword Match', score: '18/20', pct: 90 },
-                { label: 'Skills Competency', score: '17/20', pct: 85 },
-                { label: 'Experience Relevance', score: '9/10', pct: 90 },
-                { label: 'Project Alignment', score: '9/10', pct: 90 },
-                { label: 'Formatting & Layout', score: '10/10', pct: 100 },
-              ].map((cat, i) => (
-                <div key={i} className="space-y-1">
-                  <div className="flex justify-between text-xs font-semibold text-[#1F2A22]">
-                    <span>{cat.label}</span>
-                    <span className="text-[#6B8E5A]">{cat.score}</span>
-                  </div>
-                  <div className="w-full bg-[#E5EEDC] h-2 rounded-full overflow-hidden">
-                    <div
-                      className="bg-[#6B8E5A] h-full rounded-full transition-all duration-700"
-                      style={{ width: `${cat.pct}%` }}
-                    />
+          {/* One Large Real Preview Box */}
+          <div className="bg-white rounded-3xl border border-[rgba(52,78,65,0.12)] shadow-[0_24px_60px_-15px_rgba(52,78,65,0.12)] p-8 sm:p-12 space-y-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+              {/* Left Column: ATS Score & Matching Job */}
+              <div className="lg:col-span-4 space-y-6">
+                <div className="p-6 bg-[#F4F7F1] rounded-2xl border border-[#344E41]/10 space-y-3">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#6B756D]">
+                    Grounded Resume Score
+                  </span>
+                  <div className="flex items-center gap-4">
+                    <span className="text-5xl font-black text-[#344E41] font-display">84</span>
+                    <div>
+                      <span className="text-xs font-bold text-[#1F2A22] block">High Compatibility</span>
+                      <span className="text-[11px] text-[#6B756D]">Stripe & Co. • Software Engineer</span>
+                    </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
-        </div>
 
-        {/* Feature 3: Dynamic Adaptive Interview Room */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          <div className="lg:col-span-6 space-y-6">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#6B8E5A]">Realistic Practice</span>
-            <h3 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-[#1F2A22] leading-tight font-display">
-              Adaptive Interviews That <br />
-              React to Every Answer
-            </h3>
-            <p className="text-base text-[#6B756D] leading-relaxed">
-              If you give an outstanding response, our state machine scales to high-concurrency architecture. If you
-              hesitate or give a vague answer, it steps back to test foundational mechanics.
-            </p>
-            <button
-              onClick={() => onNavigate('interview')}
-              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-[#6B8E5A] text-white font-bold text-xs hover:bg-[#587649] transition-all shadow-sm"
-            >
-              Start Adaptive Mock <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
-
-          <div className="lg:col-span-6 p-8 bg-white rounded-3xl border border-[rgba(52,78,65,0.1)] shadow-premium space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-gray-100">
-              <span className="text-xs font-bold text-[#344E41]">Adaptive Difficulty State Machine</span>
-              <span className="text-xs font-semibold text-[#6B8E5A]">Live Adjustment</span>
-            </div>
-
-            <div className="space-y-3 text-xs">
-              <div className="p-3.5 bg-[#F4F7F1] rounded-2xl border border-[rgba(52,78,65,0.06)]">
-                <span className="font-bold text-[#344E41] block mb-1">Strong Candidate Answer (92%):</span>
-                <p className="text-[#6B756D]">
-                  Candidate explained MongoDB compound B-tree indexing and query projection optimization.
-                </p>
+                <div className="p-5 bg-white rounded-2xl border border-[rgba(52,78,65,0.1)] space-y-3">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#6B8E5A]">
+                    Key Matching Skills
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {['React.js', 'Node.js', 'PostgreSQL', 'REST API', 'Docker', 'JWT'].map((s) => (
+                      <span
+                        key={s}
+                        className="px-2.5 py-1 bg-[#E5EEDC] text-[#344E41] rounded-lg text-xs font-semibold"
+                      >
+                        ✓ {s}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="pt-2 border-t border-gray-100 text-xs text-[#6B756D] flex items-center gap-1.5">
+                    <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
+                    <span>Missing: Redis Caching, Kubernetes (Recommended)</span>
+                  </div>
+                </div>
               </div>
 
-              <div className="p-3.5 bg-[#E5EEDC] rounded-2xl border border-[rgba(52,78,65,0.08)] flex items-center justify-between text-[#344E41] font-semibold">
-                <span>Adaptive Decision: <strong>Escalate to Advanced Follow-up</strong></span>
-                <span>Level: Advanced</span>
+              {/* Center Column: Live Dynamic Interview Question */}
+              <div className="lg:col-span-5 p-6 bg-[#344E41] text-white rounded-2xl space-y-4 shadow-sm">
+                <div className="flex items-center justify-between text-xs text-[#D4E2C5] border-b border-white/10 pb-3">
+                  <span className="font-bold">AI Technical Mock Round</span>
+                  <span>Question 3 of 6</span>
+                </div>
+
+                <div className="space-y-2">
+                  <span className="text-[10px] uppercase font-bold text-[#8FAF78] tracking-wider block">
+                    Interviewer Question:
+                  </span>
+                  <p className="text-sm leading-relaxed font-medium">
+                    "In your project <strong>CampusIQ</strong>, you mentioned using PostgreSQL for user accounts and MongoDB for activity logging. What specific architectural tradeoff led you to adopt two different database engines?"
+                  </p>
+                </div>
+
+                <div className="p-3 bg-white/10 rounded-xl text-xs space-y-1">
+                  <span className="text-[10px] text-[#D4E2C5] font-bold block">Candidate Answer:</span>
+                  <p className="text-white/90 italic">
+                    "PostgreSQL gave us relational integrity for user permissions, while MongoDB allowed schema flexibility for variable JSON event payloads."
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between pt-1 text-xs">
+                  <span className="text-[#8FAF78] font-bold">Evaluation: Strong (91%)</span>
+                  <span className="text-[#D4E2C5] text-[11px]">Follow-up: Cross-database consistency</span>
+                </div>
               </div>
 
-              <div className="p-3.5 bg-white rounded-2xl border border-[rgba(52,78,65,0.1)]">
-                <span className="font-bold text-[#344E41] block mb-1">Generated Follow-up:</span>
-                <p className="text-[#1F2A22] italic">
-                  "How would you handle sharding and write-concern trade-offs if your cluster grows to 10M writes/minute?"
-                </p>
+              {/* Right Column: Active Application Tracker Status */}
+              <div className="lg:col-span-3 p-6 bg-[#F4F7F1] rounded-2xl border border-[#344E41]/10 space-y-4">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[#6B756D] block">
+                  Application Tracker
+                </span>
+                <div className="space-y-2">
+                  <span className="text-xs font-bold text-[#1F2A22] block">Stripe & Co.</span>
+                  <span className="text-[11px] text-[#6B756D] block">Full-Stack Engineer</span>
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#6B8E5A] text-white rounded-full text-xs font-bold">
+                    <Clock className="w-3.5 h-3.5" />
+                    Interview Scheduled
+                  </div>
+                </div>
+
+                <div className="pt-3 border-t border-[rgba(52,78,65,0.08)] text-[11px] text-[#6B756D] space-y-1">
+                  <span className="font-semibold text-[#1F2A22] block">Next Action:</span>
+                  <p>Complete 20-min System Design & Database drill before interview date.</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Bottom CTA Banner (Spacious & Refined) */}
+      {/* 5. WHY INTERVIEWIQ (The Pitch) */}
+      <section className="py-24 md:py-32 bg-white border-y border-[rgba(52,78,65,0.08)]">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+          <div className="text-center space-y-3">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#6B8E5A]">The Pitch</span>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-[#1F2A22] font-display">
+              Why InterviewIQ?
+            </h2>
+            <p className="text-base sm:text-lg text-[#6B756D] max-w-2xl mx-auto">
+              Instead of paying for separate tools for resume parsing, ATS scoring, job boards, application spreadsheets, and generic mock interview chatbots...
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="p-8 rounded-3xl bg-[#F4F7F1] border border-red-200/60 space-y-3">
+              <span className="text-xs font-bold uppercase tracking-wider text-rose-700">The Fragmented Approach</span>
+              <h4 className="text-lg font-bold text-[#1F2A22]">5 Separate Disconnected Tools</h4>
+              <ul className="space-y-2 text-xs text-[#6B756D]">
+                <li>❌ Resume parser that doesn't talk to your interview prep.</li>
+                <li>❌ Generic ATS scanners that break on C++, .NET, and Node.js.</li>
+                <li>❌ Job search boards with no clue about your actual resume match.</li>
+                <li>❌ Spreadsheets for tracking applications that go stale instantly.</li>
+                <li>❌ Static chatbots asking canned generic interview questions.</li>
+              </ul>
+            </div>
+
+            <div className="p-8 rounded-3xl bg-[#E5EEDC]/80 border border-[#6B8E5A]/40 space-y-3">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#6B8E5A]">The InterviewIQ Approach</span>
+              <h4 className="text-lg font-bold text-[#344E41]">One Connected Career Preparation Loop</h4>
+              <ul className="space-y-2 text-xs text-[#1F2A22]">
+                <li>✓ One verified resume builds your persistent candidate profile.</li>
+                <li>✓ Deterministic ATS scoring using safe, tokenized phrase matching.</li>
+                <li>✓ Live curated opportunities with genuine resume match estimates.</li>
+                <li>✓ Integrated application tracker linked to your preparation history.</li>
+                <li>✓ Adaptive voice & text interviewer that tests what you actually built.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 6. FINAL CTA SECTION */}
       <section className="py-24 md:py-32 bg-[#344E41] text-white text-center">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold font-display tracking-tight">
-            Ready to Ace Your Next Interview?
+            Your next opportunity starts with better preparation.
           </h2>
           <p className="text-base sm:text-lg text-[#D4E2C5] max-w-xl mx-auto leading-relaxed">
             Upload your resume, see your true ATS match, and practice high-impact realistic interviews today.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
             <button
-              onClick={() => onNavigate('resume')}
+              onClick={() => onNavigate('signup')}
               className="w-full sm:w-auto px-8 py-4 rounded-full bg-[#E5EEDC] text-[#344E41] font-extrabold text-sm hover:bg-white transition-all shadow-premium"
             >
-              Analyze My Resume Free
+              Start Preparing
             </button>
             <button
-              onClick={() => onNavigate('dashboard')}
+              onClick={() => onNavigate('about')}
               className="w-full sm:w-auto px-8 py-4 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold text-sm border border-white/20 transition-colors"
             >
-              Open Live Dashboard
+              About InterviewIQ
             </button>
           </div>
         </div>

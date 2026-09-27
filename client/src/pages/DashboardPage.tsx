@@ -119,9 +119,9 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
               <Sparkles className="w-5 h-5 text-[#D4E2C5]" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-[#1F2A22]">Calibrate Your Career Engine</h3>
+              <h3 className="text-lg font-bold text-[#1F2A22]">Your career workspace is ready</h3>
               <p className="text-xs text-[#6B756D]">
-                Upload your resume in PDF, DOCX, or TXT format to unlock accurate ATS keyword matching and adaptive mock interviews.
+                Your career workspace is ready. Upload your resume to start building your profile.
               </p>
             </div>
           </div>
@@ -131,17 +131,18 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
               onClick={() => onNavigate('resume')}
               className="px-6 py-2.5 rounded-full bg-[#344E41] text-white text-xs font-bold hover:bg-[#4B6B5B] transition-colors shadow-sm"
             >
-              Upload Your Resume
+              Upload Resume
             </button>
             <button
               onClick={() => onNavigate('opportunities')}
               className="px-5 py-2.5 rounded-full bg-white border border-gray-200 text-[#344E41] text-xs font-bold hover:bg-gray-50 transition-colors"
             >
-              Explore Live Opportunities
+              Explore Opportunities
             </button>
           </div>
         </div>
       )}
+
 
       {/* 3. Large Split Overview: Resume/ATS (Left) vs Interview Performance (Right) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -286,18 +287,19 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
             ) : (
               <div className="py-10 text-center space-y-3">
                 <Mic className="w-10 h-10 text-[#6B8E5A] mx-auto opacity-60" />
-                <h4 className="text-sm font-bold text-[#1F2A22]">No Mock Sessions Yet</h4>
+                <h4 className="text-sm font-bold text-[#1F2A22]">Your First Interview is Waiting</h4>
                 <p className="text-xs text-[#6B756D] max-w-xs mx-auto">
-                  Experience a human-like AI mock interview tailored to your skills, with dynamic follow-ups and comprehensive reports.
+                  Your first interview is waiting. Start a personalized interview based on your resume.
                 </p>
                 <button
                   onClick={() => onNavigate('interview')}
                   className="px-5 py-2 rounded-full bg-[#6B8E5A] text-white text-xs font-bold hover:bg-[#587649] transition-colors"
                 >
-                  Start First Mock Interview
+                  Start Interview
                 </button>
               </div>
             )}
+
           </div>
 
           <div className="pt-6 border-t border-gray-100 flex gap-3">

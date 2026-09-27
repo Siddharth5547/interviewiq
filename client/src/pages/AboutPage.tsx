@@ -4,6 +4,12 @@ import {
   ShieldCheck,
   CheckCircle2,
   ArrowRight,
+  GraduationCap,
+  Code2,
+  Briefcase,
+  Users,
+  Target,
+  FileCheck,
 } from 'lucide-react';
 import { ProductDemoPlayer } from '../components/ProductDemoPlayer.js';
 
@@ -12,46 +18,89 @@ interface AboutPageProps {
 }
 
 export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
-  const workflowSteps = [
-    { step: '01', title: 'Create Account', desc: 'Instant passwordless or credential onboarding with secure session isolation.' },
-    { step: '02', title: 'Upload Resume', desc: 'PDF/DOCX raw parser extracts 15 structured entities with semantic normalization.' },
-    { step: '03', title: 'ATS Analysis', desc: '0-100 compatibility estimate across keywords, titles, and section completeness.' },
-    { step: '04', title: 'Add Job Description', desc: 'Paste target role text to identify core competencies and expected credentials.' },
-    { step: '05', title: 'Job Matching', desc: 'Side-by-side gap analysis of verified strengths versus missing domain keywords.' },
-    { step: '06', title: 'Improve Resume', desc: 'Google STAR/XYZ bullet enhancements without fabricating unverified metrics.' },
-    { step: '07', title: 'Start AI Interview', desc: 'Configure difficulty, duration, and text/voice mode grounded in your profile.' },
-    { step: '08', title: 'Answer Questions', desc: 'Audio speech-to-text or structured written responses evaluated live.' },
-    { step: '09', title: 'Adaptive Follow-ups', desc: 'Dynamic state machine scales difficulty up or down based on response depth.' },
-    { step: '10', title: 'Diagnostic Report', desc: '7-pillar radar scoring, question coaching, and Resume Reality Check.' },
-    { step: '11', title: 'Practice Weak Areas', desc: 'Immediate 3-question targeted drill sessions addressing detected gaps.' },
+  const twelveSteps = [
+    { step: '01', title: 'Create Your Account', desc: 'Secure credential or session onboarding with isolated data privacy.' },
+    { step: '02', title: 'Upload Your Resume', desc: 'Validated parser extracts verified skills, projects, and education from PDF, DOCX, or TXT.' },
+    { step: '03', title: 'Build Candidate Profile', desc: 'Transforms parsed resume into structured technical and domain competencies.' },
+    { step: '04', title: 'Add Target Job Description', desc: 'Paste employer requirements or select target positions to calibrate scoring.' },
+    { step: '05', title: 'Review ATS Score & Gaps', desc: 'Estimated 0-100 compatibility estimate with matched and missing keyword analysis.' },
+    { step: '06', title: 'Improve Your Resume', desc: 'Google STAR/XYZ bullet enhancements without fabricating unearned credentials.' },
+    { step: '07', title: 'Discover Jobs & Internships', desc: 'Browse curated live opportunities with genuine resume match percentages.' },
+    { step: '08', title: 'Apply Through Official Sources', desc: 'Direct redirects to official company job pages without fake auto-submission claims.' },
+    { step: '09', title: 'Track Your Application', desc: '8-stage recruitment tracker to monitor status from Saved to Interview and Offer.' },
+    { step: '10', title: 'Start Personalized AI Interview', desc: '7 tracks and 5 personality modes testing what you actually built.' },
+    { step: '11', title: 'Review Interview Report', desc: 'Per-question scoring, model answer comparisons, and respectful reality check.' },
+    { step: '12', title: 'Practice Your Weak Areas', desc: 'Targeted drill sessions addressing specific concepts flagged during your interview.' },
+  ];
+
+  const targetAudiences = [
+    {
+      icon: GraduationCap,
+      title: 'College Students & New Grads',
+      desc: 'Land your first tech internship or full-time software engineering role with verified project explanations and ATS optimization.',
+    },
+    {
+      icon: Code2,
+      title: 'Software Developers & Engineers',
+      desc: 'Sharpen system design, backend architectures, concurrency tradeoffs, and live technical communication.',
+    },
+    {
+      icon: Briefcase,
+      title: 'Job Seekers in Career Transition',
+      desc: 'Align existing technical competencies against new role requirements and highlight transferable engineering strengths.',
+    },
+    {
+      icon: Target,
+      title: 'Placement Drive Candidates',
+      desc: 'Prepare for rigorous campus recruitment drives, technical screenings, and HR culture-fit rounds with real-time feedback.',
+    },
   ];
 
   return (
     <div className="min-h-screen bg-[#F4F7F1] text-[#1F2A22] selection:bg-[#D4E2C5]">
-      {/* Editorial Hero */}
-      <section className="pt-20 pb-16 md:pt-28 md:pb-20 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#E5EEDC] text-[#344E41] text-xs font-bold uppercase tracking-wider mb-6">
+      {/* 1. WHAT IS INTERVIEWIQ? (Hero & Story) */}
+      <section className="pt-20 pb-16 md:pt-28 md:pb-24 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#E5EEDC] text-[#344E41] text-xs font-bold uppercase tracking-wider">
           <Sparkles className="w-3.5 h-3.5 text-[#6B8E5A]" />
-          About InterviewIQ
+          What is InterviewIQ?
         </div>
 
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-[#1F2A22] leading-[1.1] mb-6 font-display">
-          Interview preparation <br />
-          <span className="text-[#6B8E5A]">built around YOU.</span>
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-[#1F2A22] leading-[1.1] font-display">
+          An AI career-prep platform <br />
+          <span className="text-[#6B8E5A]">grounded in reality.</span>
         </h1>
 
         <p className="text-lg sm:text-xl text-[#6B756D] leading-relaxed max-w-3xl mx-auto">
-          We built InterviewIQ to replace generic chatbot prompts with a rigorous, realistic AI career engine
-          grounded strictly in what you have actually built, claimed, and achieved.
+          InterviewIQ is an AI-powered career-prep platform that helps students and job seekers understand their resume, check ATS compatibility, discover relevant opportunities, improve applications, practice interviews, and track progress.
         </p>
+
+        <div className="pt-4 flex flex-wrap items-center justify-center gap-6 text-xs text-[#6B756D]">
+          <span className="flex items-center gap-1.5 font-medium">
+            <ShieldCheck className="w-4 h-4 text-[#6B8E5A]" /> Zero Data Fabrication
+          </span>
+          <span className="flex items-center gap-1.5 font-medium">
+            <FileCheck className="w-4 h-4 text-[#6B8E5A]" /> Safe ATS Matching
+          </span>
+          <span className="flex items-center gap-1.5 font-medium">
+            <Users className="w-4 h-4 text-[#6B8E5A]" /> Candidate-Centered Privacy
+          </span>
+        </div>
       </section>
 
-      {/* 16:9 Premium Demo Video Section (MAJOR VISUAL SECTION) */}
-      <section className="py-12 md:py-20 bg-white border-y border-[rgba(52,78,65,0.08)]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* 2. DEMO VIDEO SECTION (Major Visual Section) */}
+      <section className="py-16 md:py-24 bg-white border-y border-[rgba(52,78,65,0.08)]">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+          <div className="text-center max-w-2xl mx-auto space-y-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#6B8E5A]">Product Walkthrough</span>
+            <h2 className="text-3xl font-bold text-[#1F2A22] font-display">See InterviewIQ in Action</h2>
+            <p className="text-sm text-[#6B756D]">
+              From uploading your resume to completing a personalized AI interview, see how InterviewIQ helps you prepare.
+            </p>
+          </div>
+
           <ProductDemoPlayer onNavigate={onNavigate} />
 
-          <p className="text-center text-xs text-[#6B756D] mt-6">
+          <p className="text-center text-xs text-[#6B756D]">
             Pro tip: Place full-length custom video file at{' '}
             <code className="bg-[#E5EEDC] px-1.5 py-0.5 rounded text-[#344E41] font-mono">
               client/public/videos/interviewiq-demo.mp4
@@ -61,81 +110,116 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
         </div>
       </section>
 
-      {/* What is InterviewIQ? */}
-      <section className="py-20 md:py-28 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-          <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-[#6B8E5A]">Our Philosophy</span>
-            <h3 className="text-3xl font-bold text-[#1F2A22] mt-2 mb-4 font-display">
-              Why We Never Fabricate Information
-            </h3>
-            <p className="text-sm text-[#6B756D] leading-relaxed mb-4">
-              Most generic AI tools will happily hallucinate imaginary metrics, invent leadership roles you never had,
-              or rewrite your resume with fake buzzwords.
-            </p>
-            <p className="text-sm text-[#6B756D] leading-relaxed">
-              When you get to an actual live engineering loop, hiring managers see through this immediately. InterviewIQ
-              only enhances phrasing, elevates architectural trade-offs, and prepares you for questions about what you
-              <strong> actually built</strong>.
-            </p>
-          </div>
-
-          <div className="p-8 bg-white rounded-3xl border border-[rgba(52,78,65,0.1)] shadow-soft space-y-4">
-            <div className="flex items-center gap-3 pb-3 border-b border-gray-100">
-              <ShieldCheck className="w-6 h-6 text-[#6B8E5A]" />
-              <h4 className="font-bold text-sm text-[#1F2A22]">The InterviewIQ Guarantee</h4>
-            </div>
-            <ul className="space-y-3 text-xs text-[#1F2A22]">
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-[#6B8E5A] flex-shrink-0 mt-0.5" />
-                <span>Zero fabricated skills, projects, or metrics.</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-[#6B8E5A] flex-shrink-0 mt-0.5" />
-                <span>Honest ATS compatibility approximation with full disclaimers.</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-[#6B8E5A] flex-shrink-0 mt-0.5" />
-                <span>Adaptive state machine that prevents question repetition.</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-[#6B8E5A] flex-shrink-0 mt-0.5" />
-                <span>100% private resume and interview transcript isolation.</span>
-              </li>
-            </ul>
-          </div>
+      {/* 3. HOW TO USE INTERVIEWIQ (12-Step Story) */}
+      <section className="py-20 md:py-28 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+        <div className="text-center max-w-3xl mx-auto space-y-3">
+          <span className="text-xs font-bold uppercase tracking-wider text-[#6B8E5A]">The Full Journey</span>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-[#1F2A22] font-display">
+            How to Use InterviewIQ in 12 Steps
+          </h2>
+          <p className="text-sm sm:text-base text-[#6B756D]">
+            A seamless career roadmap taking you from raw document parsing to targeted interview mastery.
+          </p>
         </div>
 
-        {/* 11 Steps Complete Workflow Storytelling */}
-        <div className="pt-12 border-t border-[rgba(52,78,65,0.08)]">
-          <div className="text-center max-w-2xl mx-auto mb-12">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#6B8E5A]">Complete Journey</span>
-            <h3 className="text-2xl sm:text-3xl font-bold text-[#1F2A22] mt-1 font-display">
-              11-Step Career Preparation Flow
-            </h3>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {workflowSteps.map((item, idx) => (
-              <div
-                key={idx}
-                className="p-6 rounded-2xl bg-white border border-[rgba(52,78,65,0.08)] shadow-soft hover:border-[#6B8E5A]/40 transition-colors"
-              >
-                <span className="text-2xl font-black text-[#D4E2C5] block mb-2">{item.step}</span>
-                <h4 className="text-sm font-bold text-[#1F2A22] mb-1">{item.title}</h4>
-                <p className="text-xs text-[#6B756D] leading-relaxed">{item.desc}</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {twelveSteps.map((item, idx) => (
+            <div
+              key={idx}
+              className="p-6 rounded-2xl bg-white border border-[rgba(52,78,65,0.08)] shadow-soft hover:border-[#6B8E5A]/40 transition-colors space-y-2"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-2xl font-black text-[#D4E2C5] font-display">{item.step}</span>
+                <CheckCircle2 className="w-4 h-4 text-[#6B8E5A] opacity-60" />
               </div>
-            ))}
+              <h3 className="text-sm font-bold text-[#1F2A22]">{item.title}</h3>
+              <p className="text-xs text-[#6B756D] leading-relaxed">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 4. THE INTERVIEWIQ WORKFLOW (Visual Timeline) */}
+      <section className="py-20 bg-white border-y border-[rgba(52,78,65,0.08)]">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+          <div className="text-center max-w-2xl mx-auto space-y-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#6B8E5A]">Architecture Loop</span>
+            <h2 className="text-3xl font-bold text-[#1F2A22] font-display">The InterviewIQ Workflow</h2>
+            <p className="text-sm text-[#6B756D]">
+              One connected preparation cycle where each stage feeds directly into the next.
+            </p>
+          </div>
+
+          {/* Visual Timeline Bar */}
+          <div className="p-6 bg-[#F4F7F1] rounded-3xl border border-[rgba(52,78,65,0.08)] overflow-x-auto">
+            <div className="flex items-center justify-between min-w-[760px] gap-2 text-center text-xs">
+              {[
+                'Resume',
+                'AI Candidate Profile',
+                'ATS Analysis',
+                'Opportunity Match',
+                'Resume Improvement',
+                'Application',
+                'AI Interview',
+                'Performance Report',
+                'Weak Area Practice',
+              ].map((node, i, arr) => (
+                <React.Fragment key={node}>
+                  <div className="flex flex-col items-center gap-2 flex-1">
+                    <div className="w-8 h-8 rounded-full bg-[#344E41] text-white flex items-center justify-center font-bold text-xs shadow-xs">
+                      {i + 1}
+                    </div>
+                    <span className="font-semibold text-[#1F2A22] text-[11px] max-w-[90px] leading-tight">
+                      {node}
+                    </span>
+                  </div>
+                  {i < arr.length - 1 && (
+                    <div className="w-6 h-0.5 bg-[#6B8E5A] -mt-5" />
+                  )}
+                </React.Fragment>
+              ))}
+            </div>
           </div>
         </div>
+      </section>
 
-        {/* Bottom CTA */}
+      {/* 5. WHO IT'S FOR */}
+      <section className="py-20 md:py-28 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+        <div className="text-center max-w-2xl mx-auto space-y-2">
+          <span className="text-xs font-bold uppercase tracking-wider text-[#6B8E5A]">Target Audience</span>
+          <h2 className="text-3xl font-bold text-[#1F2A22] font-display">Who It's Built For</h2>
+          <p className="text-sm text-[#6B756D]">
+            InterviewIQ is tailored specifically for technology candidates preparing for high-standard hiring loops.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {targetAudiences.map((aud, i) => {
+            const Icon = aud.icon;
+            return (
+              <div
+                key={i}
+                className="p-8 bg-white rounded-3xl border border-[rgba(52,78,65,0.08)] shadow-soft space-y-3 flex items-start gap-5"
+              >
+                <div className="w-12 h-12 rounded-2xl bg-[#E5EEDC] text-[#344E41] flex items-center justify-center flex-shrink-0 mt-1">
+                  <Icon className="w-6 h-6 text-[#6B8E5A]" />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-base font-bold text-[#1F2A22]">{aud.title}</h3>
+                  <p className="text-xs sm:text-sm text-[#6B756D] leading-relaxed">{aud.desc}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Bottom Destination Action */}
         <div className="pt-8 text-center">
           <button
             onClick={() => onNavigate('dashboard')}
             className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#344E41] text-white font-semibold text-sm hover:bg-[#4B6B5B] transition-all shadow-premium"
           >
-            Go to Your Dashboard <ArrowRight className="w-4 h-4" />
+            Launch Your Career Dashboard <ArrowRight className="w-4 h-4" />
           </button>
         </div>
       </section>

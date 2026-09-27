@@ -345,9 +345,9 @@ export const ApplicationsPage: React.FC<ApplicationsPageProps> = ({
       ) : applications.length === 0 ? (
         <div className="p-12 text-center bg-white rounded-3xl border border-[rgba(52,78,65,0.1)] space-y-4">
           <Briefcase className="w-12 h-12 text-[#6B8E5A] mx-auto opacity-70" />
-          <h3 className="text-lg font-bold text-[#1F2A22]">No Applications Tracked in This View</h3>
+          <h3 className="text-lg font-bold text-[#1F2A22]">No Applications Yet</h3>
           <p className="text-sm text-[#6B756D] max-w-md mx-auto">
-            Find matching roles on the Opportunities page or click "Track External Job" to log an application you submitted elsewhere.
+            No applications yet. When you apply to an opportunity, you can track it here.
           </p>
           <div className="flex justify-center gap-3 pt-2">
             <button

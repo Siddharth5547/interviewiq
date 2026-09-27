@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext.js';
+import { api } from '../services/api.js';
+
 import { Sparkles, Lock, Mail, User, Briefcase, ArrowRight, Loader2, Zap, ShieldCheck } from 'lucide-react';
 
 interface SignupPageProps {
@@ -46,11 +48,23 @@ export const SignupPage: React.FC<SignupPageProps> = ({ onNavigate }) => {
     }
   };
 
-  const handleSSOClick = (provider: string) => {
-    setError(
-      `${provider} OAuth is currently in integration standby: GOOGLE_CLIENT_ID / APPLE_CLIENT_ID credentials are not configured in server/.env. Please use Email & Password registration or Launch Demo Pilot.`
-    );
+  const handleSSOClick = async (provider: string) => {
+    setError('');
+    try {
+      const res = await api.getOAuthUrl(provider.toLowerCase());
+      if (res.data?.success && res.data?.url) {
+        window.location.href = res.data.url;
+        return;
+      }
+    } catch (err: any) {
+      const required = err.response?.data?.requiredEnv?.join(', ');
+      setError(
+        err.response?.data?.error ||
+          `${provider} OAuth is in integration standby: server credentials (${required || 'CLIENT_ID / SECRET'}) are not configured yet. Please register with Email & Password or Launch Demo Pilot.`
+      );
+    }
   };
+
 
   return (
     <div className="min-h-screen bg-[#F4F7F1] flex items-center justify-center px-4 py-16">

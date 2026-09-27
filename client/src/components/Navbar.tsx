@@ -21,21 +21,23 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
 
   const publicNav = [
     { id: 'landing', label: 'Home' },
-    { id: 'features_section', label: 'Features' },
-    { id: 'how_it_works', label: 'How It Works' },
-    { id: 'opportunities', label: 'Opportunities' },
     { id: 'about', label: 'About' },
+    { id: 'opportunities', label: 'Opportunities' },
+    { id: 'resume', label: 'Resume' },
+    { id: 'interview', label: 'Interview' },
   ];
 
   const authNav = [
     { id: 'dashboard', label: 'Dashboard' },
     { id: 'opportunities', label: 'Opportunities' },
     { id: 'applications', label: 'Applications' },
-    { id: 'ats', label: 'ATS & Resume' },
-    { id: 'interview', label: 'AI Mock' },
+    { id: 'resume', label: 'Resume' },
+    { id: 'interview', label: 'Interview' },
+    { id: 'about', label: 'About' },
   ];
 
   const mainNav = user ? authNav : publicNav;
+
 
 
   const handleNavClick = (id: string) => {
