@@ -19,6 +19,17 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     }
 
     const normalizedEmail = email.toLowerCase().trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(normalizedEmail)) {
+      res.status(400).json({ success: false, error: 'Please enter a valid email address.' });
+      return;
+    }
+
+    if (password.length < 6) {
+      res.status(400).json({ success: false, error: 'Password must be at least 6 characters long.' });
+      return;
+    }
+
     const { fallbackStoreActive } = getDBStatus();
 
     let userExists = false;

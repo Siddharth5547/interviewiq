@@ -32,8 +32,8 @@ export const SignupPage: React.FC<SignupPageProps> = ({ onNavigate }) => {
       await register(email, password, fullName, targetRole);
       onNavigate('dashboard');
     } catch (err: any) {
-      if (err.message === 'Unable to connect to the authentication server.') {
-        setError('Unable to connect to the authentication server.');
+      if (err.message?.includes('connecting to InterviewIQ') || err.code === 'ERR_NETWORK' || !err.response) {
+        setError('Something went wrong while connecting to InterviewIQ. Please try again.');
       } else {
         setError(err.response?.data?.error || 'Registration failed. Please try a different email.');
       }
@@ -66,10 +66,19 @@ export const SignupPage: React.FC<SignupPageProps> = ({ onNavigate }) => {
         return;
       }
     } catch (err: any) {
+      const required = err.response?.data?.requiredEnv?.join(', ');
       if (provider.toLowerCase() === 'apple') {
-        setError('Apple sign-in configuration is incomplete.');
+        setError(
+          required
+            ? `Implementation ready — external Apple Developer configuration required (${required}).`
+            : 'Implementation ready — external Apple Developer configuration required.'
+        );
       } else {
-        setError('Google sign-in could not be completed. Please try again.');
+        setError(
+          required
+            ? `Google sign-in configuration required: ${required} must be set in server environment.`
+            : 'Google sign-in could not be completed. Please try again.'
+        );
       }
     }
   };
@@ -159,8 +168,16 @@ export const SignupPage: React.FC<SignupPageProps> = ({ onNavigate }) => {
         </div>
 
         {activeError && (
-          <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-800 leading-relaxed">
-            {activeError}
+          <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-800 leading-relaxed flex items-center justify-between gap-3">
+            <span className="flex-1">{activeError}</span>
+            <button
+              type="button"
+              onClick={(e) => handleSubmit(e)}
+              disabled={loading}
+              className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-900 transition-colors flex-shrink-0 cursor-pointer"
+            >
+              Retry
+            </button>
           </div>
         )}
 

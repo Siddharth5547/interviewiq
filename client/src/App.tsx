@@ -172,17 +172,7 @@ const AppContent: React.FC = () => {
         onNavigate={setCurrentTab}
       />
 
-      {/* Floating Guided Tour Trigger */}
-      <div className="fixed bottom-6 right-6 z-40">
-        <button
-          onClick={() => setShowOnboarding(true)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/90 backdrop-blur-md border border-[#344E41]/15 text-[#344E41] text-xs font-semibold shadow-lg hover:shadow-xl hover:bg-white transition-all transform hover:-translate-y-0.5"
-          title="Interactive Product Walkthrough"
-        >
-          <Sparkles className="w-3.5 h-3.5 text-[#6B8E5A]" />
-          <span>Interactive Tour</span>
-        </button>
-      </div>
+
 
       {/* Premium Sage Global Footer */}
       <footer className="bg-white border-t border-[#344E41]/10 py-12 text-[#6B756D]">

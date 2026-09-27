@@ -177,7 +177,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (err: any) {
       setAuthState('authentication failed');
       if (err.code === 'ERR_NETWORK' || !err.response) {
-        const msg = 'Unable to connect to the authentication server.';
+        const msg = 'Something went wrong while connecting to InterviewIQ. Please try again.';
         setAuthError(msg);
         throw new Error(msg);
       }
@@ -203,7 +203,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (err: any) {
       setAuthState('authentication failed');
       if (err.code === 'ERR_NETWORK' || !err.response) {
-        const msg = 'Unable to connect to the authentication server.';
+        const msg = 'Something went wrong while connecting to InterviewIQ. Please try again.';
         setAuthError(msg);
         throw new Error(msg);
       }

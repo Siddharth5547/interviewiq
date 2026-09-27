@@ -57,15 +57,15 @@ export const AnimatedWorkflowSection: React.FC<AnimatedWorkflowSectionProps> = (
         interactiveSnippet: (
           <div className="p-3 bg-white rounded-xl border border-[#344E41]/10 text-xs space-y-2">
             <div className="flex items-center justify-between text-[11px] text-[#6B756D]">
-              <span className="font-semibold text-[#1F2A22]">siddharth_resume_2026.pdf</span>
-              <span className="text-[#6B8E5A] font-bold">100% Parsed</span>
+              <span className="font-semibold text-[#1F2A22]">Interactive_Demo_Preview.pdf</span>
+              <span className="text-[#6B8E5A] font-bold text-[10px] uppercase tracking-wide bg-[#E5EEDC] px-2 py-0.5 rounded">Sample Scan</span>
             </div>
             <div className="w-full bg-[#E5EEDC] h-1.5 rounded-full overflow-hidden">
               <div className="bg-[#6B8E5A] h-full w-full rounded-full transition-all duration-500" />
             </div>
             <div className="flex items-center gap-1.5 text-[10px] text-[#6B756D]">
               <CheckCircle2 className="w-3 h-3 text-[#6B8E5A]" />
-              <span>Contact info, 14 skills, 3 projects verified</span>
+              <span>Sample extraction: contact info, skills, and projects verified</span>
             </div>
           </div>
         ),
