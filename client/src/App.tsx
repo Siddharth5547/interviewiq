@@ -42,6 +42,7 @@ const AppContent: React.FC = () => {
         'opportunities',
         'applications',
       ];
+      if (path === 'auth/callback') return 'dashboard';
       if (validTabs.includes(path)) return path;
     }
     return 'landing';

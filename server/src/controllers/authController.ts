@@ -187,12 +187,31 @@ export const getMe = async (req: AuthRequest, res: Response): Promise<void> => {
 };
 
 
-const getFrontendUrl = (): string => {
-  return process.env.FRONTEND_URL || process.env.CLIENT_URL || process.env.APP_URL || 'http://localhost:5173';
+const getFrontendUrl = (req?: Request): string => {
+  if (process.env.FRONTEND_URL) return process.env.FRONTEND_URL.replace(/\/$/, '');
+  if (process.env.CLIENT_URL) return process.env.CLIENT_URL.replace(/\/$/, '');
+  if (process.env.APP_URL) return process.env.APP_URL.replace(/\/$/, '');
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  if (req) {
+    const proto = req.headers['x-forwarded-proto'] || (req.secure ? 'https' : 'http');
+    const host = req.headers['x-forwarded-host'] || req.headers.host;
+    if (host) return `${proto}://${host}`;
+  }
+  return 'http://localhost:5173';
 };
 
-const getBackendUrl = (): string => {
-  return process.env.BACKEND_URL || process.env.SERVER_URL || 'http://localhost:5000';
+const getBackendUrl = (req?: Request): string => {
+  if (process.env.BACKEND_URL) return process.env.BACKEND_URL.replace(/\/$/, '');
+  if (process.env.SERVER_URL) return process.env.SERVER_URL.replace(/\/$/, '');
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  if (req) {
+    const proto = req.headers['x-forwarded-proto'] || (req.secure ? 'https' : 'http');
+    const host = req.headers['x-forwarded-host'] || req.headers.host;
+    if (host) return `${proto}://${host}`;
+  }
+  return 'http://localhost:5000';
 };
 
 export const getOAuthStatus = async (_req: Request, res: Response): Promise<void> => {
@@ -204,7 +223,10 @@ export const getOAuthStatus = async (_req: Request, res: Response): Promise<void
       requiredEnv: ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'GOOGLE_REDIRECT_URI'],
     },
     apple: {
-      configured: !!(process.env.APPLE_CLIENT_ID && process.env.APPLE_CLIENT_SECRET),
+      configured: !!(
+        process.env.APPLE_CLIENT_ID &&
+        (process.env.APPLE_PRIVATE_KEY || process.env.APPLE_KEY_ID || process.env.APPLE_CLIENT_SECRET)
+      ),
       clientId: process.env.APPLE_CLIENT_ID ? process.env.APPLE_CLIENT_ID.substring(0, 12) + '...' : null,
       requiredEnv: ['APPLE_CLIENT_ID', 'APPLE_TEAM_ID', 'APPLE_KEY_ID', 'APPLE_PRIVATE_KEY', 'APPLE_REDIRECT_URI'],
     },
@@ -224,7 +246,7 @@ export const getOAuthUrl = async (req: Request, res: Response): Promise<void> =>
 
   if (provider === 'google') {
     const clientId = process.env.GOOGLE_CLIENT_ID;
-    const redirectUri = process.env.GOOGLE_REDIRECT_URI || `${getBackendUrl()}/api/auth/oauth/google/callback`;
+    const redirectUri = process.env.GOOGLE_REDIRECT_URI || `${getBackendUrl(req)}/api/auth/oauth/google/callback`;
 
     if (!clientId || !process.env.GOOGLE_CLIENT_SECRET) {
       res.status(501).json({
@@ -251,9 +273,9 @@ export const getOAuthUrl = async (req: Request, res: Response): Promise<void> =>
 
   if (provider === 'apple') {
     const clientId = process.env.APPLE_CLIENT_ID;
-    const redirectUri = process.env.APPLE_REDIRECT_URI || `${getBackendUrl()}/api/auth/oauth/apple/callback`;
+    const redirectUri = process.env.APPLE_REDIRECT_URI || `${getBackendUrl(req)}/api/auth/oauth/apple/callback`;
 
-    if (!clientId || !process.env.APPLE_CLIENT_SECRET) {
+    if (!clientId || !(process.env.APPLE_PRIVATE_KEY || process.env.APPLE_KEY_ID || process.env.APPLE_CLIENT_SECRET)) {
       res.status(501).json({
         success: false,
         error: 'Apple Sign-In is not configured. Required server variables: APPLE_CLIENT_ID, APPLE_TEAM_ID, APPLE_KEY_ID, APPLE_PRIVATE_KEY, and APPLE_REDIRECT_URI.',
@@ -281,7 +303,7 @@ export const getOAuthUrl = async (req: Request, res: Response): Promise<void> =>
 };
 
 export const googleOAuthCallback = async (req: Request, res: Response): Promise<void> => {
-  const frontendUrl = getFrontendUrl();
+  const frontendUrl = getFrontendUrl(req);
   const { code, state, error: oauthError } = req.query;
 
   if (oauthError) {
@@ -308,7 +330,7 @@ export const googleOAuthCallback = async (req: Request, res: Response): Promise<
 
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  const redirectUri = process.env.GOOGLE_REDIRECT_URI || `${getBackendUrl()}/api/auth/oauth/google/callback`;
+  const redirectUri = process.env.GOOGLE_REDIRECT_URI || `${getBackendUrl(req)}/api/auth/oauth/google/callback`;
 
   if (!clientId || !clientSecret) {
     res.redirect(`${frontendUrl}/login?error=google_not_configured`);
@@ -411,7 +433,7 @@ export const googleOAuthCallback = async (req: Request, res: Response): Promise<
     const userId = user._id ? user._id.toString() : user.id;
     const token = jwt.sign({ userId, email: normalizedEmail }, JWT_SECRET, { expiresIn: '7d' });
 
-    res.redirect(`${frontendUrl}/auth/callback?token=${encodeURIComponent(token)}`);
+    res.redirect(`${frontendUrl}/dashboard?token=${encodeURIComponent(token)}`);
   } catch (error: any) {
     console.error('[Google OAuth Error]:', error);
     res.redirect(`${frontendUrl}/login?error=google_failed`);
@@ -419,7 +441,7 @@ export const googleOAuthCallback = async (req: Request, res: Response): Promise<
 };
 
 export const appleOAuthCallback = async (req: Request, res: Response): Promise<void> => {
-  const frontendUrl = getFrontendUrl();
+  const frontendUrl = getFrontendUrl(req);
   const payload = { ...req.query, ...req.body };
   const { code, id_token, state, user: userJson, error: appleError } = payload;
 
@@ -549,7 +571,7 @@ export const appleOAuthCallback = async (req: Request, res: Response): Promise<v
     const userId = user._id ? user._id.toString() : user.id;
     const token = jwt.sign({ userId, email: normalizedEmail }, JWT_SECRET, { expiresIn: '7d' });
 
-    res.redirect(`${frontendUrl}/auth/callback?token=${encodeURIComponent(token)}`);
+    res.redirect(`${frontendUrl}/dashboard?token=${encodeURIComponent(token)}`);
   } catch (error: any) {
     console.error('[Apple OAuth Error]:', error);
     res.redirect(`${frontendUrl}/login?error=apple_failed`);
