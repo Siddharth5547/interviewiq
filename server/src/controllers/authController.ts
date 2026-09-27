@@ -12,8 +12,11 @@ const JWT_SECRET = process.env.JWT_SECRET || process.env.SESSION_SECRET || 'inte
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { email, password, fullName, targetRole } = req.body;
-    if (!email || !password || !fullName) {
+    const { email, password, fullName, name, targetRole, targetJobTitle } = req.body;
+    const finalName = (fullName || name || '').trim();
+    const finalRole = (targetRole || targetJobTitle || 'Software Engineer').trim();
+
+    if (!email || !password || !finalName) {
       res.status(400).json({ success: false, error: 'Email, password, and full name are required.' });
       return;
     }
@@ -53,8 +56,8 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       createdUser = await UserModel.create({
         email: normalizedEmail,
         passwordHash,
-        fullName: fullName.trim(),
-        targetRole: targetRole || 'Software Engineer',
+        fullName: finalName,
+        targetRole: finalRole,
       });
     } else {
       const id = memoryStore.generateId();
@@ -63,8 +66,8 @@ export const register = async (req: Request, res: Response): Promise<void> => {
         id,
         email: normalizedEmail,
         passwordHash,
-        fullName: fullName.trim(),
-        targetRole: targetRole || 'Software Engineer',
+        fullName: finalName,
+        targetRole: finalRole,
         createdAt: new Date(),
       };
       memoryStore.users.set(normalizedEmail, createdUser);
