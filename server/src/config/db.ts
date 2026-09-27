@@ -7,11 +7,12 @@ let isConnected = false;
 let fallbackStoreActive = false;
 
 export const connectDB = async (): Promise<boolean> => {
-  const uri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/interviewiq';
+  const uri = process.env.MONGODB_URI || process.env.DATABASE_URL || 'mongodb://127.0.0.1:27017/interviewiq';
   try {
     mongoose.set('strictQuery', false);
+    mongoose.set('bufferCommands', false);
     await mongoose.connect(uri, {
-      serverSelectionTimeoutMS: 4000,
+      serverSelectionTimeoutMS: 3000,
     });
     isConnected = true;
     fallbackStoreActive = false;
@@ -25,7 +26,10 @@ export const connectDB = async (): Promise<boolean> => {
   }
 };
 
-export const getDBStatus = () => ({
-  isConnected,
-  fallbackStoreActive,
-});
+export const getDBStatus = () => {
+  const ready = mongoose.connection.readyState === 1;
+  return {
+    isConnected: ready,
+    fallbackStoreActive: fallbackStoreActive || !ready,
+  };
+};

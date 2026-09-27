@@ -10,10 +10,12 @@ class MemoryStore {
   opportunities: Map<string, any> = new Map();
   applications: Map<string, any> = new Map();
   candidatePreferences: Map<string, any> = new Map();
+  oauthStates: Map<string, { provider: 'google' | 'apple'; nonce?: string; createdAt: number }> = new Map();
 
   generateId(): string {
     return crypto.randomUUID();
   }
+
 }
 
 export const memoryStore = new MemoryStore();

@@ -22,7 +22,7 @@ import { Interview } from './types/index.js';
 import { Sparkles, HelpCircle, ShieldCheck } from 'lucide-react';
 
 const AppContent: React.FC = () => {
-  const { user } = useAuth();
+  const { user, authState } = useAuth();
   const getInitialTab = (): string => {
     if (typeof window !== 'undefined') {
       const path = window.location.pathname.replace(/^\//, '').toLowerCase();
@@ -47,6 +47,15 @@ const AppContent: React.FC = () => {
     return 'landing';
   };
 
+  const protectedTabs = [
+    'dashboard',
+    'settings',
+    'applications',
+    'history',
+    'interview_room',
+    'interview_report',
+    'practice',
+  ];
 
   const [currentTab, setCurrentTabState] = useState<string>(getInitialTab);
   const [activeInterview, setActiveInterview] = useState<Interview | null>(null);
@@ -64,6 +73,19 @@ const AppContent: React.FC = () => {
     }
   };
 
+  // Protected route enforcement & auth loop prevention
+  React.useEffect(() => {
+    if (authState === 'logged out' || authState === 'authentication failed') {
+      if (protectedTabs.includes(currentTab)) {
+        setCurrentTab('login');
+      }
+    } else if (authState === 'authenticated') {
+      if (currentTab === 'login' || currentTab === 'signup') {
+        setCurrentTab('dashboard');
+      }
+    }
+  }, [authState, currentTab]);
+
   React.useEffect(() => {
     const handlePopState = () => {
       const path = window.location.pathname.replace(/^\//, '').toLowerCase();
@@ -72,6 +94,7 @@ const AppContent: React.FC = () => {
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
+
 
   const handleStartInterview = (interview: Interview) => {
     setActiveInterview(interview);

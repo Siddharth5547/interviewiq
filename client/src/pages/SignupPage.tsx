@@ -9,13 +9,15 @@ interface SignupPageProps {
 }
 
 export const SignupPage: React.FC<SignupPageProps> = ({ onNavigate }) => {
-  const { register, quickDemoLogin } = useAuth();
+  const { register, quickDemoLogin, authError, clearAuthError } = useAuth();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [targetRole, setTargetRole] = useState('Full Stack Software Engineer');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const activeError = error || authError;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,11 +27,16 @@ export const SignupPage: React.FC<SignupPageProps> = ({ onNavigate }) => {
     }
     setLoading(true);
     setError('');
+    clearAuthError();
     try {
       await register(email, password, fullName, targetRole);
       onNavigate('dashboard');
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Registration failed. Please try a different email.');
+      if (err.message === 'Unable to connect to the authentication server.') {
+        setError('Unable to connect to the authentication server.');
+      } else {
+        setError(err.response?.data?.error || 'Registration failed. Please try a different email.');
+      }
     } finally {
       setLoading(false);
     }
@@ -38,11 +45,12 @@ export const SignupPage: React.FC<SignupPageProps> = ({ onNavigate }) => {
   const handleDemo = async () => {
     setLoading(true);
     setError('');
+    clearAuthError();
     try {
       await quickDemoLogin();
       onNavigate('dashboard');
     } catch (err: any) {
-      setError('Failed to initiate demo session.');
+      setError('Unable to connect to the authentication server.');
     } finally {
       setLoading(false);
     }
@@ -50,6 +58,7 @@ export const SignupPage: React.FC<SignupPageProps> = ({ onNavigate }) => {
 
   const handleSSOClick = async (provider: string) => {
     setError('');
+    clearAuthError();
     try {
       const res = await api.getOAuthUrl(provider.toLowerCase());
       if (res.data?.success && res.data?.url) {
@@ -57,11 +66,11 @@ export const SignupPage: React.FC<SignupPageProps> = ({ onNavigate }) => {
         return;
       }
     } catch (err: any) {
-      const required = err.response?.data?.requiredEnv?.join(', ');
-      setError(
-        err.response?.data?.error ||
-          `${provider} OAuth is in integration standby: server credentials (${required || 'CLIENT_ID / SECRET'}) are not configured yet. Please register with Email & Password or Launch Demo Pilot.`
-      );
+      if (provider.toLowerCase() === 'apple') {
+        setError('Apple sign-in configuration is incomplete.');
+      } else {
+        setError('Google sign-in could not be completed. Please try again.');
+      }
     }
   };
 
@@ -149,9 +158,9 @@ export const SignupPage: React.FC<SignupPageProps> = ({ onNavigate }) => {
           </span>
         </div>
 
-        {error && (
+        {activeError && (
           <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-800 leading-relaxed">
-            {error}
+            {activeError}
           </div>
         )}
 

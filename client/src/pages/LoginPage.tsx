@@ -10,11 +10,13 @@ interface LoginPageProps {
 }
 
 export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
-  const { login, quickDemoLogin } = useAuth();
+  const { login, quickDemoLogin, authError, clearAuthError } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const activeError = error || authError;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,11 +26,16 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
     }
     setLoading(true);
     setError('');
+    clearAuthError();
     try {
       await login(email, password);
       onNavigate('dashboard');
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Invalid credentials. Please try again or use Instant Demo.');
+      if (err.message === 'Unable to connect to the authentication server.') {
+        setError('Unable to connect to the authentication server.');
+      } else {
+        setError(err.response?.data?.error || 'Invalid email or password.');
+      }
     } finally {
       setLoading(false);
     }
@@ -37,11 +44,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
   const handleDemo = async () => {
     setLoading(true);
     setError('');
+    clearAuthError();
     try {
       await quickDemoLogin();
       onNavigate('dashboard');
     } catch (err: any) {
-      setError('Failed to initiate demo session.');
+      setError('Unable to connect to the authentication server.');
     } finally {
       setLoading(false);
     }
@@ -49,6 +57,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
 
   const handleSSOClick = async (provider: string) => {
     setError('');
+    clearAuthError();
     try {
       const res = await api.getOAuthUrl(provider.toLowerCase());
       if (res.data?.success && res.data?.url) {
@@ -56,13 +65,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
         return;
       }
     } catch (err: any) {
-      const required = err.response?.data?.requiredEnv?.join(', ');
-      setError(
-        err.response?.data?.error ||
-          `${provider} OAuth is in integration standby: server credentials (${required || 'CLIENT_ID / SECRET'}) are not configured yet. Please sign in with Email & Password or Launch Demo Pilot.`
-      );
+      if (provider.toLowerCase() === 'apple') {
+        setError('Apple sign-in configuration is incomplete.');
+      } else {
+        setError('Google sign-in could not be completed. Please try again.');
+      }
     }
   };
+
 
 
   return (
@@ -149,9 +159,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
           </span>
         </div>
 
-        {error && (
+        {activeError && (
           <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-800 leading-relaxed">
-            {error}
+            {activeError}
           </div>
         )}
 

@@ -15,7 +15,18 @@ import {
   CandidatePreferences,
 } from '../types/index.js';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const getApiBaseUrl = (): string => {
+  if (import.meta.env.VITE_API_URL) {
+    const raw = import.meta.env.VITE_API_URL.replace(/\/$/, '');
+    return raw.endsWith('/api') ? raw : `${raw}/api`;
+  }
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    return '/api';
+  }
+  return 'http://localhost:5000/api';
+};
+
+export const API_BASE_URL = getApiBaseUrl();
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -23,6 +34,7 @@ export const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
 
 // Attach JWT token from localStorage
 apiClient.interceptors.request.use((config) => {
@@ -36,12 +48,12 @@ apiClient.interceptors.request.use((config) => {
 export const api = {
   // Auth
   register: (data: { email: string; password: string; fullName: string; targetRole?: string }) =>
-    apiClient.post<{ success: boolean; token: string; user: User }>('/auth/register', data),
+    apiClient.post<{ success: boolean; token: string; user: User; error?: string }>('/auth/register', data),
   login: (data: { email: string; password: string }) =>
-    apiClient.post<{ success: boolean; token: string; user: User }>('/auth/login', data),
-  getMe: () => apiClient.get<{ success: boolean; user: User }>('/auth/me'),
+    apiClient.post<{ success: boolean; token: string; user: User; error?: string }>('/auth/login', data),
+  getMe: () => apiClient.get<{ success: boolean; user: User; error?: string }>('/auth/me'),
   quickDemoLogin: () =>
-    apiClient.post<{ success: boolean; token: string; user: User }>('/auth/demo-login'),
+    apiClient.post<{ success: boolean; token: string; user: User; error?: string }>('/auth/demo-login'),
   getOAuthStatus: () =>
     apiClient.get<{ success: boolean; google: any; apple: any }>('/auth/oauth/status'),
   getOAuthUrl: (provider: string) =>

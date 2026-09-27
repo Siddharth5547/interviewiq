@@ -17,14 +17,14 @@ export const authenticateToken = (req: AuthRequest, res: Response, next: NextFun
     return;
   }
 
-  const secret = process.env.JWT_SECRET || 'interviewiq_super_secret_jwt_key_2026_production';
+  const secret = process.env.JWT_SECRET || process.env.SESSION_SECRET || 'interviewiq_super_secret_jwt_key_2026_production';
 
   try {
     const decoded = jwt.verify(token, secret) as { userId: string; email: string };
     req.user = decoded;
     next();
   } catch (err) {
-    res.status(403).json({ success: false, error: 'Invalid or expired authentication token.' });
+    res.status(401).json({ success: false, error: 'Your session has expired. Please sign in again.' });
   }
 };
 
@@ -38,7 +38,7 @@ export const optionalAuth = (req: AuthRequest, res: Response, next: NextFunction
     return next();
   }
 
-  const secret = process.env.JWT_SECRET || 'interviewiq_super_secret_jwt_key_2026_production';
+  const secret = process.env.JWT_SECRET || process.env.SESSION_SECRET || 'interviewiq_super_secret_jwt_key_2026_production';
   try {
     const decoded = jwt.verify(token, secret) as { userId: string; email: string };
     req.user = decoded;
