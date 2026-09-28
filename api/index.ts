@@ -1,17 +1,13 @@
-let appInstance: any = null;
+import { app } from '../server/src/app.js';
+import { connectDB } from '../server/src/config/db.js';
 
 export default async function handler(req: any, res: any) {
-  if (!appInstance) {
-    const { app } = await import('../server/src/app.js');
-    appInstance = app;
-  }
-
-  const { connectDB } = await import('../server/src/config/db.js');
   try {
     await connectDB();
   } catch (err) {
-    console.warn('MongoDB connect warning in serverless handler:', err);
+    // Non-blocking fallback is handled in connectDB
   }
 
-  return appInstance(req, res);
+  return app(req, res);
 }
+

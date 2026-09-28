@@ -18,8 +18,12 @@ export const startInterview = async (req: AuthRequest, res: Response): Promise<v
     let job: any;
 
     if (!fallbackStoreActive) {
-      resume = await ResumeModel.findOne({ _id: resumeId, userId });
-      if (jobDescriptionId) job = await JobDescriptionModel.findById(jobDescriptionId);
+      const [r, j] = await Promise.all([
+        ResumeModel.findOne({ _id: resumeId, userId }).lean(),
+        jobDescriptionId ? JobDescriptionModel.findById(jobDescriptionId).lean() : Promise.resolve(null),
+      ]);
+      resume = r;
+      job = j;
     } else {
       resume = memoryStore.resumes.get(resumeId);
       if (jobDescriptionId) job = memoryStore.jobs.get(jobDescriptionId);

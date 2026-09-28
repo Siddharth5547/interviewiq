@@ -33,5 +33,8 @@ const JobDescriptionSchema: Schema = new Schema(
   { timestamps: true }
 );
 
+JobDescriptionSchema.index({ userId: 1, createdAt: -1 });
+
 export const JobDescriptionModel =
   mongoose.models.JobDescription || mongoose.model<IJobDescription>('JobDescription', JobDescriptionSchema);
+

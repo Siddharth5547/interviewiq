@@ -131,4 +131,7 @@ const ResumeSchema: Schema = new Schema(
   { timestamps: true }
 );
 
+ResumeSchema.index({ userId: 1, createdAt: -1 });
+
 export const ResumeModel = mongoose.models.Resume || mongoose.model<IResume>('Resume', ResumeSchema);
+

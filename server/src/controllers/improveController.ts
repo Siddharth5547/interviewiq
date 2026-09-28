@@ -16,9 +16,19 @@ export const generateImprovements = async (req: AuthRequest, res: Response): Pro
     let resume: any;
     let job: any;
 
+    let baselineScore = 68;
+
     if (!fallbackStoreActive) {
-      resume = await ResumeModel.findOne({ _id: resumeId, userId });
-      job = await JobDescriptionModel.findById(jobDescriptionId);
+      const [r, j, existingATS] = await Promise.all([
+        ResumeModel.findOne({ _id: resumeId, userId }).lean(),
+        JobDescriptionModel.findById(jobDescriptionId).lean(),
+        ATSAnalysisModel.findOne({ resumeId, jobDescriptionId }).lean(),
+      ]);
+      resume = r;
+      job = j;
+      if (existingATS && (existingATS as any).overallScore) {
+        baselineScore = (existingATS as any).overallScore;
+      }
     } else {
       resume = memoryStore.resumes.get(resumeId);
       job = memoryStore.jobs.get(jobDescriptionId);
@@ -31,13 +41,6 @@ export const generateImprovements = async (req: AuthRequest, res: Response): Pro
     if (!job) {
       res.status(404).json({ success: false, error: 'Target job description not found.' });
       return;
-    }
-
-    // Fetch or calculate baseline score
-    let baselineScore = 68;
-    if (!fallbackStoreActive) {
-      const existingATS = await ATSAnalysisModel.findOne({ resumeId, jobDescriptionId });
-      if (existingATS) baselineScore = existingATS.overallScore;
     }
 
     const improvementResult = await resumeImprover.generateGroundedImprovements(

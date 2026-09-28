@@ -1,25 +1,37 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext.js';
 import { Navbar } from './components/Navbar.js';
-import { LandingPage } from './pages/LandingPage.js';
-import { AboutPage } from './pages/AboutPage.js';
-import { SettingsPage } from './pages/SettingsPage.js';
-import { LoginPage } from './pages/LoginPage.js';
-import { SignupPage } from './pages/SignupPage.js';
-import { DashboardPage } from './pages/DashboardPage.js';
-import { ResumePage } from './pages/ResumePage.js';
-import { ATSPage } from './pages/ATSPage.js';
-import { ResumeImproverPage } from './pages/ResumeImproverPage.js';
-import { InterviewSetupPage } from './pages/InterviewSetupPage.js';
-import { InterviewRoomPage } from './pages/InterviewRoomPage.js';
-import { InterviewReportPage } from './pages/InterviewReportPage.js';
-import { PracticePage } from './pages/PracticePage.js';
-import { HistoryPage } from './pages/HistoryPage.js';
-import { OpportunitiesPage } from './pages/OpportunitiesPage.js';
-import { ApplicationsPage } from './pages/ApplicationsPage.js';
-import { OnboardingModal } from './components/OnboardingModal.js';
 import { Interview } from './types/index.js';
 import { Sparkles, HelpCircle, ShieldCheck } from 'lucide-react';
+
+// Dynamic route code-splitting for optimal initial load speed
+const LandingPage = React.lazy(() => import('./pages/LandingPage.js').then((m) => ({ default: m.LandingPage })));
+const AboutPage = React.lazy(() => import('./pages/AboutPage.js').then((m) => ({ default: m.AboutPage })));
+const SettingsPage = React.lazy(() => import('./pages/SettingsPage.js').then((m) => ({ default: m.SettingsPage })));
+const LoginPage = React.lazy(() => import('./pages/LoginPage.js').then((m) => ({ default: m.LoginPage })));
+const SignupPage = React.lazy(() => import('./pages/SignupPage.js').then((m) => ({ default: m.SignupPage })));
+const DashboardPage = React.lazy(() => import('./pages/DashboardPage.js').then((m) => ({ default: m.DashboardPage })));
+const ResumePage = React.lazy(() => import('./pages/ResumePage.js').then((m) => ({ default: m.ResumePage })));
+const ATSPage = React.lazy(() => import('./pages/ATSPage.js').then((m) => ({ default: m.ATSPage })));
+const ResumeImproverPage = React.lazy(() => import('./pages/ResumeImproverPage.js').then((m) => ({ default: m.ResumeImproverPage })));
+const InterviewSetupPage = React.lazy(() => import('./pages/InterviewSetupPage.js').then((m) => ({ default: m.InterviewSetupPage })));
+const InterviewRoomPage = React.lazy(() => import('./pages/InterviewRoomPage.js').then((m) => ({ default: m.InterviewRoomPage })));
+const InterviewReportPage = React.lazy(() => import('./pages/InterviewReportPage.js').then((m) => ({ default: m.InterviewReportPage })));
+const PracticePage = React.lazy(() => import('./pages/PracticePage.js').then((m) => ({ default: m.PracticePage })));
+const HistoryPage = React.lazy(() => import('./pages/HistoryPage.js').then((m) => ({ default: m.HistoryPage })));
+const OpportunitiesPage = React.lazy(() => import('./pages/OpportunitiesPage.js').then((m) => ({ default: m.OpportunitiesPage })));
+const ApplicationsPage = React.lazy(() => import('./pages/ApplicationsPage.js').then((m) => ({ default: m.ApplicationsPage })));
+const OnboardingModal = React.lazy(() => import('./components/OnboardingModal.js').then((m) => ({ default: m.OnboardingModal })));
+
+const PageLoader: React.FC = () => (
+  <div className="min-h-[50vh] flex flex-col items-center justify-center space-y-3 px-4">
+    <div className="w-10 h-10 rounded-2xl bg-[#344E41] text-white flex items-center justify-center animate-pulse">
+      <Sparkles className="w-5 h-5 text-[#8FAF78]" />
+    </div>
+    <p className="text-xs font-medium text-[#344E41]/70 animate-pulse">Loading experience...</p>
+  </div>
+);
+
 
 const AppContent: React.FC = () => {
   const { user, authState } = useAuth();
@@ -133,7 +145,7 @@ const AppContent: React.FC = () => {
             </p>
           </div>
         ) : (
-          <>
+          <Suspense fallback={<PageLoader />}>
             {currentTab === 'landing' && <LandingPage onNavigate={setCurrentTab} />}
             {currentTab === 'about' && <AboutPage onNavigate={setCurrentTab} />}
             {currentTab === 'settings' && <SettingsPage onNavigate={setCurrentTab} />}
@@ -175,16 +187,18 @@ const AppContent: React.FC = () => {
             {currentTab === 'applications' && (
               <ApplicationsPage onNavigate={setCurrentTab} />
             )}
-          </>
+          </Suspense>
         )}
       </main>
 
       {/* Onboarding Guided Modal */}
-      <OnboardingModal
-        isOpen={showOnboarding}
-        onClose={() => setShowOnboarding(false)}
-        onNavigate={setCurrentTab}
-      />
+      <Suspense fallback={null}>
+        <OnboardingModal
+          isOpen={showOnboarding}
+          onClose={() => setShowOnboarding(false)}
+          onNavigate={setCurrentTab}
+        />
+      </Suspense>
 
 
 

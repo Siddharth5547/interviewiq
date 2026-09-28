@@ -194,5 +194,9 @@ const InterviewSchema: Schema = new Schema(
   { timestamps: true }
 );
 
+InterviewSchema.index({ userId: 1, createdAt: -1 });
+InterviewSchema.index({ userId: 1, status: 1 });
+
 export const InterviewModel =
   mongoose.models.Interview || mongoose.model<IInterview>('Interview', InterviewSchema);
+

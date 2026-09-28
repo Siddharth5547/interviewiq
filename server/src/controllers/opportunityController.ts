@@ -12,21 +12,22 @@ export const listOpportunities = async (req: AuthRequest, res: Response): Promis
     const { fallbackStoreActive } = getDBStatus();
 
     // Fetch user resume if available to compute live match scores
-    let resume: any;
-    if (!fallbackStoreActive) {
-      resume = await ResumeModel.findOne({ userId }).sort({ createdAt: -1 });
-    } else {
-      const userResumes = Array.from(memoryStore.resumes.values()).filter((r) => r.userId === userId);
-      resume = userResumes.sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      )[0];
-    }
+    const [resume, oppResult] = await Promise.all([
+      !fallbackStoreActive
+        ? ResumeModel.findOne({ userId }, { parsedData: 1 }).sort({ createdAt: -1 }).lean()
+        : Promise.resolve(
+            Array.from(memoryStore.resumes.values())
+              .filter((r) => r.userId === userId)
+              .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0]
+          ),
+      opportunityService.listOpportunities({
+        employmentType: employmentType as string,
+        remoteType: remoteType as string,
+        search: search as string,
+      }),
+    ]);
 
-    const { opportunities, totalCount } = await opportunityService.listOpportunities({
-      employmentType: employmentType as string,
-      remoteType: remoteType as string,
-      search: search as string,
-    });
+    const { opportunities, totalCount } = oppResult;
 
     // Compute live match for each opportunity if resume exists
     const enriched = opportunities.map((opp) => {
@@ -62,20 +63,20 @@ export const getOpportunityDetails = async (req: AuthRequest, res: Response): Pr
     const userId = req.user?.userId || 'guest-user-session';
     const { fallbackStoreActive } = getDBStatus();
 
-    const opportunity = await opportunityService.getOpportunityById(id);
+    const [opportunity, resume] = await Promise.all([
+      opportunityService.getOpportunityById(id),
+      !fallbackStoreActive
+        ? ResumeModel.findOne({ userId }, { parsedData: 1 }).sort({ createdAt: -1 }).lean()
+        : Promise.resolve(
+            Array.from(memoryStore.resumes.values())
+              .filter((r) => r.userId === userId)
+              .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0]
+          ),
+    ]);
+
     if (!opportunity) {
       res.status(404).json({ success: false, error: 'Opportunity not found.' });
       return;
-    }
-
-    let resume: any;
-    if (!fallbackStoreActive) {
-      resume = await ResumeModel.findOne({ userId }).sort({ createdAt: -1 });
-    } else {
-      const userResumes = Array.from(memoryStore.resumes.values()).filter((r) => r.userId === userId);
-      resume = userResumes.sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      )[0];
     }
 
     let match = null;

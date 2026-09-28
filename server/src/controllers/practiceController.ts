@@ -13,7 +13,9 @@ export const getDetectedWeakAreas = async (req: AuthRequest, res: Response): Pro
 
     let interviews: any[] = [];
     if (!fallbackStoreActive) {
-      interviews = await InterviewModel.find({ userId, status: 'completed' });
+      interviews = await InterviewModel.find({ userId, status: 'completed' })
+        .select('finalReport.weakTopics conversation.evaluation')
+        .lean();
     } else {
       interviews = Array.from(memoryStore.interviews.values()).filter(
         (i) => i.userId === userId && i.status === 'completed'

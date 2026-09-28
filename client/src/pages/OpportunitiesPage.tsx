@@ -49,8 +49,7 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
   const [savedSuccessMsg, setSavedSuccessMsg] = useState('');
 
   useEffect(() => {
-    fetchOpportunities();
-    fetchPreferences();
+    Promise.allSettled([fetchOpportunities(), fetchPreferences()]);
   }, [employmentType, remoteType]);
 
   const fetchOpportunities = async () => {

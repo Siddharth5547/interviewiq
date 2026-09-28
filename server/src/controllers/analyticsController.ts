@@ -18,10 +18,16 @@ export const getDashboardOverview = async (req: AuthRequest, res: Response): Pro
     let interviews: any[] = [];
 
     if (!fallbackStoreActive) {
-      resume = await ResumeModel.findOne({ userId }).sort({ createdAt: -1 });
-      job = await JobDescriptionModel.findOne({ userId }).sort({ createdAt: -1 });
-      latestATS = await ATSAnalysisModel.findOne({ userId }).sort({ createdAt: -1 });
-      interviews = await InterviewModel.find({ userId }).sort({ createdAt: -1 });
+      const [r, j, ats, ivs] = await Promise.all([
+        ResumeModel.findOne({ userId }, { filename: 1, updatedAt: 1, createdAt: 1, 'parsedData.skills.all': 1, intelligenceTags: 1 }).sort({ createdAt: -1 }).lean(),
+        JobDescriptionModel.findOne({ userId }, { title: 1, company: 1 }).sort({ createdAt: -1 }).lean(),
+        ATSAnalysisModel.findOne({ userId }, { overallScore: 1, label: 1, matchingKeywords: 1, missingKeywords: 1, missingSkills: 1 }).sort({ createdAt: -1 }).lean(),
+        InterviewModel.find({ userId }, { status: 1, type: 1, startedAt: 1, completedAt: 1, 'finalReport.overallScore': 1, 'finalReport.categories': 1, 'finalReport.weakTopics': 1 }).sort({ createdAt: -1 }).lean(),
+      ]);
+      resume = r;
+      job = j;
+      latestATS = ats;
+      interviews = ivs;
     } else {
       const userResumes = Array.from(memoryStore.resumes.values()).filter((r) => r.userId === userId);
       resume = userResumes.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];

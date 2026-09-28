@@ -17,8 +17,12 @@ export const analyzeATS = async (req: AuthRequest, res: Response): Promise<void>
     let job: any;
 
     if (!fallbackStoreActive) {
-      resume = await ResumeModel.findOne({ _id: resumeId, userId });
-      job = await JobDescriptionModel.findById(jobDescriptionId);
+      const [r, j] = await Promise.all([
+        ResumeModel.findOne({ _id: resumeId, userId }).lean(),
+        JobDescriptionModel.findById(jobDescriptionId).lean(),
+      ]);
+      resume = r;
+      job = j;
     } else {
       resume = memoryStore.resumes.get(resumeId);
       job = memoryStore.jobs.get(jobDescriptionId);
@@ -94,7 +98,7 @@ export const getLatestATSAnalysis = async (req: AuthRequest, res: Response): Pro
 
     let analysis: any;
     if (!fallbackStoreActive) {
-      analysis = await ATSAnalysisModel.findOne({ userId }).sort({ createdAt: -1 });
+      analysis = await ATSAnalysisModel.findOne({ userId }).sort({ createdAt: -1 }).lean();
     } else {
       const userAnalyses = Array.from(memoryStore.atsAnalyses.values()).filter((a) => a.userId === userId);
       analysis = userAnalyses.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];

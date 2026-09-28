@@ -79,5 +79,9 @@ const ATSAnalysisSchema: Schema = new Schema(
   { timestamps: true }
 );
 
+ATSAnalysisSchema.index({ userId: 1, createdAt: -1 });
+ATSAnalysisSchema.index({ resumeId: 1, jobDescriptionId: 1 });
+
 export const ATSAnalysisModel =
   mongoose.models.ATSAnalysis || mongoose.model<IATSAnalysis>('ATSAnalysis', ATSAnalysisSchema);
+

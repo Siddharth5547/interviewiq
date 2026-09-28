@@ -16,6 +16,9 @@ export class AIProviderService {
   private geminiClient: GoogleGenerativeAI | null = null;
   private geminiModel: any = null;
   private aiModel: string = 'grok-beta';
+  private xaiCooldownUntil: number = 0;
+  private openaiCooldownUntil: number = 0;
+  private cache = new Map<string, { val: string; exp: number }>();
 
   constructor() {
     this.xaiKey = process.env.XAI_API_KEY?.trim() || null;
@@ -81,6 +84,8 @@ export class AIProviderService {
    */
   private async callXAI(systemPrompt: string | undefined, userPrompt: string, temperature: number): Promise<string | null> {
     if (!this.xaiKey) return null;
+    if (Date.now() < this.xaiCooldownUntil) return null;
+
     const messages: Array<{ role: string; content: string }> = [];
     if (systemPrompt) messages.push({ role: 'system', content: systemPrompt });
     messages.push({ role: 'user', content: userPrompt });
@@ -103,6 +108,10 @@ export class AIProviderService {
       if (!response.ok) {
         const errorText = await response.text();
         console.warn(`[AIProvider:xAI] Request failed with HTTP ${response.status}:`, errorText);
+        // If out of credits (403), unauthorized (401), or rate limited (429), cool down for 5 mins
+        if (response.status === 401 || response.status === 403 || response.status === 429) {
+          this.xaiCooldownUntil = Date.now() + 5 * 60 * 1000;
+        }
         return null;
       }
 
@@ -110,6 +119,7 @@ export class AIProviderService {
       return data.choices?.[0]?.message?.content || null;
     } catch (err: any) {
       console.warn('[AIProvider:xAI] Network error calling xAI:', err.message);
+      this.xaiCooldownUntil = Date.now() + 60 * 1000;
       return null;
     }
   }
@@ -119,6 +129,8 @@ export class AIProviderService {
    */
   private async callOpenAI(systemPrompt: string | undefined, userPrompt: string, temperature: number): Promise<string | null> {
     if (!this.openaiKey) return null;
+    if (Date.now() < this.openaiCooldownUntil) return null;
+
     const messages: Array<{ role: string; content: string }> = [];
     if (systemPrompt) messages.push({ role: 'system', content: systemPrompt });
     messages.push({ role: 'user', content: userPrompt });
@@ -140,6 +152,9 @@ export class AIProviderService {
       if (!response.ok) {
         const errorText = await response.text();
         console.warn(`[AIProvider:OpenAI] Request failed with HTTP ${response.status}:`, errorText);
+        if (response.status === 401 || response.status === 403 || response.status === 429) {
+          this.openaiCooldownUntil = Date.now() + 5 * 60 * 1000;
+        }
         return null;
       }
 
@@ -147,6 +162,7 @@ export class AIProviderService {
       return data.choices?.[0]?.message?.content || null;
     } catch (err: any) {
       console.warn('[AIProvider:OpenAI] Network error calling OpenAI:', err.message);
+      this.openaiCooldownUntil = Date.now() + 60 * 1000;
       return null;
     }
   }
@@ -156,27 +172,45 @@ export class AIProviderService {
    */
   public async generateText(options: AICompletionOptions): Promise<string | null> {
     const { systemPrompt, userPrompt, temperature = 0.3 } = options;
+    const cacheKey = `${systemPrompt || ''}:::${userPrompt}:::${temperature}`;
 
-    if (this.activeProvider === 'xai') {
-      const res = await this.callXAI(systemPrompt, userPrompt, temperature);
-      if (res) return res;
+    // Cache hit check
+    const cached = this.cache.get(cacheKey);
+    if (cached && Date.now() < cached.exp) {
+      return cached.val;
     }
 
-    if (this.activeProvider === 'openai') {
-      const res = await this.callOpenAI(systemPrompt, userPrompt, temperature);
-      if (res) return res;
+    let result: string | null = null;
+
+    if (this.activeProvider === 'xai') {
+      result = await this.callXAI(systemPrompt, userPrompt, temperature);
+    }
+
+    if (!result && this.activeProvider === 'openai') {
+      result = await this.callOpenAI(systemPrompt, userPrompt, temperature);
+    }
+
+    if (result) {
+      if (this.cache.size > 200) this.cache.clear();
+      this.cache.set(cacheKey, { val: result, exp: Date.now() + 15 * 60 * 1000 });
+      return result;
     }
 
     if (this.geminiModel) {
       try {
         const fullPrompt = `${systemPrompt ? `SYSTEM:\n${systemPrompt}\n\n` : ''}USER:\n${userPrompt}`;
-        const result = await this.geminiModel.generateContent({
+        const genResult = await this.geminiModel.generateContent({
           contents: [{ role: 'user', parts: [{ text: fullPrompt }] }],
           generationConfig: {
             temperature,
           },
         });
-        return result.response.text();
+        const text = genResult.response.text();
+        if (text) {
+          if (this.cache.size > 200) this.cache.clear();
+          this.cache.set(cacheKey, { val: text, exp: Date.now() + 15 * 60 * 1000 });
+          return text;
+        }
       } catch (error: any) {
         console.warn('[AIProvider:Gemini] API call failed, falling back:', error.message);
       }
