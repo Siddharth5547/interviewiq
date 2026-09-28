@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
@@ -151,8 +152,20 @@ export const getMe = async (req: AuthRequest, res: Response): Promise<void> => {
     const { fallbackStoreActive } = getDBStatus();
     let user: any;
 
-    if (!fallbackStoreActive) {
-      user = await UserModel.findById(userId).select('-passwordHash');
+    if (userId === 'demo-candidate-user-1') {
+      user = {
+        id: 'demo-candidate-user-1',
+        email: 'demo.engineer@interviewiq.ai',
+        fullName: 'Demo Candidate',
+        targetRole: 'Full Stack Engineer',
+        authProvider: 'local',
+      };
+    } else if (!fallbackStoreActive) {
+      if (mongoose.Types.ObjectId.isValid(userId)) {
+        user = await UserModel.findById(userId).select('-passwordHash').lean();
+      } else {
+        user = await UserModel.findOne({ email: req.user?.email }).select('-passwordHash').lean();
+      }
     } else {
       for (const u of memoryStore.users.values()) {
         if (u.id === userId || u._id === userId) {
