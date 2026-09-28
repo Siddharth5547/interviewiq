@@ -8,9 +8,25 @@ export interface AuthRequest extends Request {
   };
 }
 
-export const authenticateToken = (req: AuthRequest, res: Response, next: NextFunction): void => {
+const extractToken = (req: Request): string | null => {
   const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    return authHeader.split(' ')[1];
+  }
+  if (req.headers.cookie) {
+    const cookies = req.headers.cookie.split(';');
+    for (const cookie of cookies) {
+      const [name, val] = cookie.trim().split('=');
+      if (name === 'interviewiq_token' && val) {
+        return decodeURIComponent(val);
+      }
+    }
+  }
+  return null;
+};
+
+export const authenticateToken = (req: AuthRequest, res: Response, next: NextFunction): void => {
+  const token = extractToken(req);
 
   if (!token) {
     res.status(401).json({ success: false, error: 'Authentication required. No token provided.' });
@@ -29,8 +45,7 @@ export const authenticateToken = (req: AuthRequest, res: Response, next: NextFun
 };
 
 export const optionalAuth = (req: AuthRequest, res: Response, next: NextFunction): void => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
+  const token = extractToken(req);
 
   if (!token) {
     // Provide a guest user context if no token

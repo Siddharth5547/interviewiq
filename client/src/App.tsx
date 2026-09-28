@@ -123,46 +123,59 @@ const AppContent: React.FC = () => {
       <Navbar currentTab={currentTab} setCurrentTab={setCurrentTab} />
 
       <main className="flex-1">
-        {currentTab === 'landing' && <LandingPage onNavigate={setCurrentTab} />}
-        {currentTab === 'about' && <AboutPage onNavigate={setCurrentTab} />}
-        {currentTab === 'settings' && <SettingsPage onNavigate={setCurrentTab} />}
-        {currentTab === 'login' && <LoginPage onNavigate={setCurrentTab} />}
-        {currentTab === 'signup' && <SignupPage onNavigate={setCurrentTab} />}
-        {currentTab === 'dashboard' && <DashboardPage onNavigate={setCurrentTab} />}
-        {currentTab === 'resume' && <ResumePage onNavigate={setCurrentTab} />}
-        {currentTab === 'ats' && <ATSPage onNavigate={setCurrentTab} />}
-        {currentTab === 'improve' && <ResumeImproverPage onNavigate={setCurrentTab} />}
-        {currentTab === 'interview' && (
-          <InterviewSetupPage onStart={handleStartInterview} onNavigate={setCurrentTab} />
-        )}
-        {currentTab === 'interview_room' && activeInterview && (
-          <InterviewRoomPage
-            interview={activeInterview}
-            onComplete={handleCompleteInterview}
-            onExit={() => setCurrentTab('interview')}
-          />
-        )}
-        {currentTab === 'interview_report' && selectedReportInterview && (
-          <InterviewReportPage
-            interview={selectedReportInterview}
-            onNavigate={setCurrentTab}
-            onPracticeTopic={handlePracticeTopicFromReport}
-          />
-        )}
-        {currentTab === 'practice' && (
-          <PracticePage initialTopic={practiceTopic} onNavigate={setCurrentTab} />
-        )}
-        {currentTab === 'history' && (
-          <HistoryPage
-            onOpenReport={handleOpenReportFromHistory}
-            onNavigate={setCurrentTab}
-          />
-        )}
-        {currentTab === 'opportunities' && (
-          <OpportunitiesPage onNavigate={setCurrentTab} />
-        )}
-        {currentTab === 'applications' && (
-          <ApplicationsPage onNavigate={setCurrentTab} />
+        {authState === 'authenticating' && protectedTabs.includes(currentTab) ? (
+          <div className="min-h-[60vh] flex flex-col items-center justify-center space-y-4 px-4">
+            <div className="w-12 h-12 rounded-2xl bg-[#344E41] text-white flex items-center justify-center animate-pulse">
+              <Sparkles className="w-6 h-6 text-[#8FAF78]" />
+            </div>
+            <p className="text-sm font-medium text-[#344E41] animate-pulse">
+              Verifying your session...
+            </p>
+          </div>
+        ) : (
+          <>
+            {currentTab === 'landing' && <LandingPage onNavigate={setCurrentTab} />}
+            {currentTab === 'about' && <AboutPage onNavigate={setCurrentTab} />}
+            {currentTab === 'settings' && <SettingsPage onNavigate={setCurrentTab} />}
+            {currentTab === 'login' && <LoginPage onNavigate={setCurrentTab} />}
+            {currentTab === 'signup' && <SignupPage onNavigate={setCurrentTab} />}
+            {currentTab === 'dashboard' && <DashboardPage onNavigate={setCurrentTab} />}
+            {currentTab === 'resume' && <ResumePage onNavigate={setCurrentTab} />}
+            {currentTab === 'ats' && <ATSPage onNavigate={setCurrentTab} />}
+            {currentTab === 'improve' && <ResumeImproverPage onNavigate={setCurrentTab} />}
+            {currentTab === 'interview' && (
+              <InterviewSetupPage onStart={handleStartInterview} onNavigate={setCurrentTab} />
+            )}
+            {currentTab === 'interview_room' && activeInterview && (
+              <InterviewRoomPage
+                interview={activeInterview}
+                onComplete={handleCompleteInterview}
+                onExit={() => setCurrentTab('interview')}
+              />
+            )}
+            {currentTab === 'interview_report' && selectedReportInterview && (
+              <InterviewReportPage
+                interview={selectedReportInterview}
+                onNavigate={setCurrentTab}
+                onPracticeTopic={handlePracticeTopicFromReport}
+              />
+            )}
+            {currentTab === 'practice' && (
+              <PracticePage initialTopic={practiceTopic} onNavigate={setCurrentTab} />
+            )}
+            {currentTab === 'history' && (
+              <HistoryPage
+                onOpenReport={handleOpenReportFromHistory}
+                onNavigate={setCurrentTab}
+              />
+            )}
+            {currentTab === 'opportunities' && (
+              <OpportunitiesPage onNavigate={setCurrentTab} />
+            )}
+            {currentTab === 'applications' && (
+              <ApplicationsPage onNavigate={setCurrentTab} />
+            )}
+          </>
         )}
       </main>
 

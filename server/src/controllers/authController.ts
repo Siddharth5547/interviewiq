@@ -233,6 +233,70 @@ export const getOAuthStatus = async (_req: Request, res: Response): Promise<void
   });
 };
 
+/**
+ * Generates a tamper-proof signed OAuth state parameter that is completely stateless
+ * and survives across ephemeral serverless lambda instances on Vercel.
+ */
+export const generateOAuthState = (provider: 'google' | 'apple', nonce?: string): string => {
+  const secret = process.env.JWT_SECRET || process.env.SESSION_SECRET || 'interviewiq_oauth_state_hmac_secret_2026';
+  const payload = {
+    p: provider,
+    t: Date.now(),
+    r: crypto.randomBytes(16).toString('hex'),
+    ...(nonce ? { n: nonce } : {}),
+  };
+  const payloadB64 = Buffer.from(JSON.stringify(payload)).toString('base64url');
+  const signature = crypto.createHmac('sha256', secret).update(payloadB64).digest('base64url');
+  const signedState = `${payloadB64}.${signature}`;
+
+  // Also retain in memoryStore as an optional cache for local environments
+  memoryStore.oauthStates.set(signedState, { provider, nonce, createdAt: Date.now() });
+
+  return signedState;
+};
+
+/**
+ * Validates the OAuth state parameter statelessly using HMAC-SHA256 signature and timestamp,
+ * with backwards-compatible fallback to memoryStore.
+ */
+export const verifyOAuthState = (state: string, expectedProvider: 'google' | 'apple'): { valid: boolean; nonce?: string } => {
+  if (!state || typeof state !== 'string') return { valid: false };
+
+  // 1. Stateless HMAC validation
+  if (state.includes('.')) {
+    const parts = state.split('.');
+    if (parts.length === 2) {
+      const [payloadB64, signature] = parts;
+      const secret = process.env.JWT_SECRET || process.env.SESSION_SECRET || 'interviewiq_oauth_state_hmac_secret_2026';
+      try {
+        const expectedSig = crypto.createHmac('sha256', secret).update(payloadB64).digest('base64url');
+        const sigBuf = Buffer.from(signature);
+        const expBuf = Buffer.from(expectedSig);
+        if (sigBuf.length === expBuf.length && crypto.timingSafeEqual(sigBuf, expBuf)) {
+          const payload = JSON.parse(Buffer.from(payloadB64, 'base64url').toString('utf8'));
+          const now = Date.now();
+          const isTimeValid = typeof payload.t === 'number' && now >= payload.t && (now - payload.t) < 15 * 60 * 1000;
+          const isProviderValid = payload.p === expectedProvider;
+          if (isTimeValid && isProviderValid) {
+            return { valid: true, nonce: payload.n };
+          }
+        }
+      } catch (err) {
+        console.warn('[OAuth State] Error parsing signed state:', err);
+      }
+    }
+  }
+
+  // 2. Memory store fallback (for backward-compatibility or local development)
+  const storedState = memoryStore.oauthStates.get(state);
+  if (storedState && storedState.provider === expectedProvider && Date.now() - storedState.createdAt <= 15 * 60 * 1000) {
+    memoryStore.oauthStates.delete(state);
+    return { valid: true, nonce: storedState.nonce };
+  }
+
+  return { valid: false };
+};
+
 export const getOAuthUrl = async (req: Request, res: Response): Promise<void> => {
   const provider = (req.params.provider || '').toLowerCase();
 
@@ -258,8 +322,7 @@ export const getOAuthUrl = async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
-    const state = crypto.randomBytes(32).toString('hex');
-    memoryStore.oauthStates.set(state, { provider: 'google', createdAt: Date.now() });
+    const state = generateOAuthState('google');
 
     const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(
       clientId
@@ -285,9 +348,8 @@ export const getOAuthUrl = async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
-    const state = crypto.randomBytes(32).toString('hex');
     const nonce = crypto.randomBytes(32).toString('hex');
-    memoryStore.oauthStates.set(state, { provider: 'apple', nonce, createdAt: Date.now() });
+    const state = generateOAuthState('apple', nonce);
 
     const authUrl = `https://appleid.apple.com/auth/authorize?client_id=${encodeURIComponent(
       clientId
@@ -320,13 +382,13 @@ export const googleOAuthCallback = async (req: Request, res: Response): Promise<
     return;
   }
 
-  // CSRF validation
-  const storedState = memoryStore.oauthStates.get(state);
-  if (!storedState || storedState.provider !== 'google' || Date.now() - storedState.createdAt > 15 * 60 * 1000) {
+  // Stateless CSRF validation
+  const stateVerification = verifyOAuthState(state, 'google');
+  if (!stateVerification.valid) {
+    console.warn('[Google OAuth] State verification failed for state parameter');
     res.redirect(`${frontendUrl}/login?error=csrf_detected`);
     return;
   }
-  memoryStore.oauthStates.delete(state);
 
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
@@ -433,6 +495,16 @@ export const googleOAuthCallback = async (req: Request, res: Response): Promise<
     const userId = user._id ? user._id.toString() : user.id;
     const token = jwt.sign({ userId, email: normalizedEmail }, JWT_SECRET, { expiresIn: '7d' });
 
+    // Set production-ready cookie
+    const isProd = process.env.NODE_ENV === 'production' || req.headers['x-forwarded-proto'] === 'https';
+    res.cookie('interviewiq_token', token, {
+      httpOnly: false,
+      secure: isProd,
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: '/',
+    });
+
     res.redirect(`${frontendUrl}/dashboard?token=${encodeURIComponent(token)}`);
   } catch (error: any) {
     console.error('[Google OAuth Error]:', error);
@@ -454,19 +526,19 @@ export const appleOAuthCallback = async (req: Request, res: Response): Promise<v
     return;
   }
 
-  if (!id_token || !state) {
+  if (!id_token || !state || typeof state !== 'string') {
     res.redirect(`${frontendUrl}/login?error=apple_failed`);
     return;
   }
 
-  // Validate state
-  const storedState = memoryStore.oauthStates.get(state);
-  if (!storedState || storedState.provider !== 'apple' || Date.now() - storedState.createdAt > 15 * 60 * 1000) {
+  // Stateless CSRF validation
+  const stateVerification = verifyOAuthState(state, 'apple');
+  if (!stateVerification.valid) {
+    console.warn('[Apple OAuth] State verification failed for state parameter');
     res.redirect(`${frontendUrl}/login?error=csrf_detected`);
     return;
   }
-  const expectedNonce = storedState.nonce;
-  memoryStore.oauthStates.delete(state);
+  const expectedNonce = stateVerification.nonce;
 
   try {
     // Decode header without verifying to extract kid
@@ -570,6 +642,16 @@ export const appleOAuthCallback = async (req: Request, res: Response): Promise<v
 
     const userId = user._id ? user._id.toString() : user.id;
     const token = jwt.sign({ userId, email: normalizedEmail }, JWT_SECRET, { expiresIn: '7d' });
+
+    // Set production-ready cookie
+    const isProd = process.env.NODE_ENV === 'production' || req.headers['x-forwarded-proto'] === 'https';
+    res.cookie('interviewiq_token', token, {
+      httpOnly: false,
+      secure: isProd,
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: '/',
+    });
 
     res.redirect(`${frontendUrl}/dashboard?token=${encodeURIComponent(token)}`);
   } catch (error: any) {

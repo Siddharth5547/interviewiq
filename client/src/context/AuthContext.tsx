@@ -42,18 +42,35 @@ const mapOAuthError = (code: string): string => {
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [token, setToken] = useState<string | null>(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('interviewiq_token');
+  const getInitialToken = (): string | null => {
+    if (typeof window === 'undefined') return null;
+    try {
+      const searchParams = new URLSearchParams(window.location.search);
+      const urlToken = searchParams.get('token');
+      if (urlToken) return urlToken;
+
+      const storedToken = localStorage.getItem('interviewiq_token');
+      if (storedToken) return storedToken;
+
+      const match = document.cookie.match(/(?:^|;\s*)interviewiq_token=([^;]+)/);
+      if (match && match[1]) return decodeURIComponent(match[1]);
+    } catch {
+      // Ignored
     }
     return null;
-  });
+  };
+
+  const [token, setToken] = useState<string | null>(getInitialToken);
 
   const [user, setUser] = useState<User | null>(null);
   const [authState, setAuthState] = useState<AuthState>(() => {
-    // If a token already exists in localStorage, start in 'authenticating' to avoid logged-out flash
-    if (typeof window !== 'undefined' && localStorage.getItem('interviewiq_token')) {
-      return 'authenticating';
+    if (typeof window !== 'undefined') {
+      const searchParams = new URLSearchParams(window.location.search);
+      if (searchParams.get('token')) return 'authenticating';
+      if (searchParams.get('error')) return 'authentication failed';
+      if (localStorage.getItem('interviewiq_token')) return 'authenticating';
+      const match = document.cookie.match(/(?:^|;\s*)interviewiq_token=([^;]+)/);
+      if (match && match[1]) return 'authenticating';
     }
     return 'logged out';
   });
@@ -232,6 +249,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = () => {
     localStorage.removeItem('interviewiq_token');
+    if (typeof document !== 'undefined') {
+      document.cookie = 'interviewiq_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0;';
+    }
     setToken(null);
     setUser(null);
     setAuthError(null);

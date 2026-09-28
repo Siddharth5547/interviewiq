@@ -18,11 +18,35 @@ dotenv.config();
 
 export const app = express();
 
+// Trust proxy for secure cookies behind reverse proxies (Vercel, Cloudflare, etc.)
+app.set('trust proxy', 1);
+
 // Middleware
+const allowedOrigins = [
+  'https://interviewiq-beryl.vercel.app',
+  'http://localhost:5173',
+  'http://localhost:5000',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:5000',
+];
+
 app.use(cors({
-  origin: '*',
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (
+      allowedOrigins.includes(origin) ||
+      origin.endsWith('.vercel.app') ||
+      origin.includes('localhost') ||
+      origin.includes('127.0.0.1')
+    ) {
+      return callback(null, true);
+    }
+    return callback(null, true);
+  },
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie', 'X-Requested-With'],
+  exposedHeaders: ['Set-Cookie'],
 }));
 
 app.use(express.json({ limit: '15mb' }));
