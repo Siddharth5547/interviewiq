@@ -184,8 +184,6 @@ Configuration reference:
 | `JWT_SECRET` | Secret key for signing candidate authentication tokens | Production Required |
 | `GOOGLE_CLIENT_ID` | Google OAuth Client ID | Optional SSO |
 | `GOOGLE_CLIENT_SECRET` | Google OAuth Client Secret | Optional SSO |
-| `APPLE_CLIENT_ID` | Apple Sign-In Client ID | Optional SSO |
-| `APPLE_CLIENT_SECRET` | Apple Sign-In Client Secret | Optional SSO |
 | `APP_URL` / `CLIENT_URL` | Base frontend URL (default: `http://localhost:5173`) | Production |
 | `SERVER_URL` | Base API URL (default: `http://localhost:5000`) | Production |
 

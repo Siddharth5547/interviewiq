@@ -56,7 +56,7 @@ export const api = {
   quickDemoLogin: () =>
     apiClient.post<{ success: boolean; token: string; user: User; error?: string }>('/auth/demo-login'),
   getOAuthStatus: () =>
-    apiClient.get<{ success: boolean; google: any; apple: any }>('/auth/oauth/status'),
+    apiClient.get<{ success: boolean; google: any }>('/auth/oauth/status'),
   getOAuthUrl: (provider: string) =>
     apiClient.get<{ success: boolean; url?: string; error?: string; requiredEnv?: string[] }>(
       `/auth/oauth/${provider}/url`

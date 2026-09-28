@@ -148,9 +148,10 @@ async function runAuthMatrixTests() {
     };
 
     // ----------------------------------------------------
+    // ----------------------------------------------------
     // Scenario 5 & 6: Single Auth System / Account Linking Simulation
     // ----------------------------------------------------
-    // Directly verify that when a user exists with email, OAuth links googleId and appleId
+    // Directly verify that when a user exists with email, OAuth links googleId
     const targetEmail = `linked_user_${Date.now()}@example.com`;
     const initialUser: any = {
       id: `usr_local_${Date.now()}`,
@@ -168,18 +169,13 @@ async function runAuthMatrixTests() {
     initialUser.avatarUrl = 'https://lh3.googleusercontent.com/a/photo.jpg';
     memoryStore.users.set(targetEmail, initialUser);
 
-    // Link Apple ID
-    initialUser.appleId = 'apple_sub_987654321';
-    memoryStore.users.set(targetEmail, initialUser);
-
     const retrievedLinkedUser = memoryStore.users.get(targetEmail);
     const passLinking = retrievedLinkedUser?.email === targetEmail &&
-      retrievedLinkedUser?.googleId === 'google_sub_1092837465' &&
-      retrievedLinkedUser?.appleId === 'apple_sub_987654321';
+      retrievedLinkedUser?.googleId === 'google_sub_1092837465';
 
     results['5 & 6. Single Auth System / Account Linking'] = {
       pass: passLinking,
-      evidence: `User ID: ${retrievedLinkedUser?.id} | Email: ${retrievedLinkedUser?.email} | googleId: ${retrievedLinkedUser?.googleId} | appleId: ${retrievedLinkedUser?.appleId} | Single DB Record (No Duplicates)`,
+      evidence: `User ID: ${retrievedLinkedUser?.id} | Email: ${retrievedLinkedUser?.email} | googleId: ${retrievedLinkedUser?.googleId} | Single DB Record (No Duplicates)`,
     };
 
     // ----------------------------------------------------
@@ -203,25 +199,25 @@ async function runAuthMatrixTests() {
     // ----------------------------------------------------
     // Scenario 19: Missing Environment Configuration Standby
     // ----------------------------------------------------
-    // Temporarily unset Apple credentials to test standby response
-    const origAppleId = process.env.APPLE_CLIENT_ID;
-    delete process.env.APPLE_CLIENT_ID;
-    const appleUnconfiguredRes = await fetch(`${baseUrl}/oauth/apple/url`);
-    const appleUnconfiguredData = (await appleUnconfiguredRes.json()) as any;
-    process.env.APPLE_CLIENT_ID = origAppleId;
+    // Temporarily unset Google credentials to test standby response
+    const origGoogleId = process.env.GOOGLE_CLIENT_ID;
+    delete process.env.GOOGLE_CLIENT_ID;
+    const googleUnconfiguredRes = await fetch(`${baseUrl}/oauth/google/url`);
+    const googleUnconfiguredData = (await googleUnconfiguredRes.json()) as any;
+    process.env.GOOGLE_CLIENT_ID = origGoogleId;
 
-    const passAppleStandby = appleUnconfiguredRes.status === 501 &&
-      appleUnconfiguredData.error?.toLowerCase().includes('apple sign-in is not configured') &&
-      Array.isArray(appleUnconfiguredData.requiredEnv);
+    const passGoogleStandby = googleUnconfiguredRes.status === 501 &&
+      googleUnconfiguredData.error?.toLowerCase().includes('google oauth is not configured') &&
+      Array.isArray(googleUnconfiguredData.requiredEnv);
     results['19. Missing environment configuration'] = {
-      pass: passAppleStandby,
-      evidence: `HTTP ${appleUnconfiguredRes.status} | Required keys: ${appleUnconfiguredData.requiredEnv?.join(', ')} | Graceful 501 standby, no crash`,
+      pass: passGoogleStandby,
+      evidence: `HTTP ${googleUnconfiguredRes.status} | Required keys: ${googleUnconfiguredData.requiredEnv?.join(', ')} | Graceful 501 standby, no crash`,
     };
 
     // ----------------------------------------------------
     // Scenario 20: Production Configuration Check
     // ----------------------------------------------------
-    const sensitiveKeys = ['JWT_SECRET', 'SESSION_SECRET', 'GOOGLE_CLIENT_SECRET', 'APPLE_PRIVATE_KEY'];
+    const sensitiveKeys = ['JWT_SECRET', 'SESSION_SECRET', 'GOOGLE_CLIENT_SECRET'];
     const redactedEnvSummary: Record<string, string> = {};
     for (const key of sensitiveKeys) {
       const val = process.env[key];

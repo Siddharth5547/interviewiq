@@ -54,8 +54,8 @@ const DEMO_SCENES: SceneData[] = [
     id: 2,
     chapter: '02 / Account Creation',
     title: 'Create Your Account',
-    subtitle: 'Sign up using email, Google, or Apple Sign-In',
-    narration: 'Create your account using email, Google, or Apple Sign-In with private session isolation for your confidential resume data.',
+    subtitle: 'Sign up using email or Google Sign-In',
+    narration: 'Create your account using email or Google Sign-In with private session isolation for your confidential resume data.',
     durationSec: 6,
     badge: 'Secure Authentication',
   },
@@ -438,7 +438,7 @@ export const ProductDemoPlayer: React.FC<ProductDemoPlayerProps> = ({ onNavigate
                 <div className="max-w-md mx-auto p-5 rounded-2xl bg-white/10 backdrop-blur-lg border border-white/15 shadow-2xl space-y-3">
                   <div className="text-center">
                     <h4 className="text-lg font-bold text-white font-display">Create Your InterviewIQ Account</h4>
-                    <p className="text-[11px] text-gray-300">Sign up using email, Google, or Apple Sign-In</p>
+                    <p className="text-[11px] text-gray-300">Sign up using email or Google Sign-In</p>
                   </div>
                   <div className="space-y-2">
                     <button className="w-full py-2 px-3 rounded-xl bg-white text-[#1F2A22] text-xs font-semibold flex items-center justify-center gap-2 hover:bg-gray-100 transition-all shadow-sm">
@@ -449,12 +449,6 @@ export const ProductDemoPlayer: React.FC<ProductDemoPlayerProps> = ({ onNavigate
                         <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
                       </svg>
                       Continue with Google
-                    </button>
-                    <button className="w-full py-2 px-3 rounded-xl bg-black/60 text-white text-xs font-semibold flex items-center justify-center gap-2 hover:bg-black/80 transition-all border border-white/20 shadow-sm">
-                      <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 170 170">
-                        <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.69-3.08-7.73-7.85-12.1-14.33-6.52-9.7-11.53-20.91-15.02-33.64-3.5-12.73-5.25-24.89-5.25-36.48 0-14.74 3.75-27.18 11.24-37.31 7.49-10.13 17.15-15.35 28.98-15.66 4.35 0 9.28 1.15 14.79 3.45 5.51 2.3 9.4 3.51 11.68 3.63 1.94-.12 6.06-1.38 12.37-3.79 6.31-2.41 11.53-3.45 15.66-3.13 11.68.86 21.05 4.88 28.1 12.06-10.02 6.09-14.9 14.88-14.64 26.37.26 8.84 3.66 16.29 10.2 22.35 6.54 6.06 14.28 9.54 23.23 10.44-2.12 6.53-4.7 13.06-7.74 19.59zM119.22 33.15c0-6.9 2.53-13.36 7.59-19.38 5.06-6.02 11.23-9.84 18.51-11.47.64 2.12.96 4.35.96 6.69 0 6.9-2.6 13.58-7.8 20.03-5.2 6.45-11.62 10.19-19.26 11.22v-7.09z" />
-                      </svg>
-                      Continue with Apple
                     </button>
                   </div>
                   <div className="pt-1 flex items-center gap-1.5 text-[10px] text-[#D4E2C5] justify-center">

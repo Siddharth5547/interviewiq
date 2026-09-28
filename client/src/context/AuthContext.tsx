@@ -26,10 +26,6 @@ const mapOAuthError = (code: string): string => {
       return 'Sign-in was cancelled. Please try again.';
     case 'google_failed':
       return 'Google sign-in could not be completed. Please try again.';
-    case 'apple_failed':
-      return 'Apple sign-in could not be completed. Please try again.';
-    case 'apple_not_configured':
-      return 'Apple sign-in configuration is incomplete.';
     case 'google_not_configured':
       return 'Google sign-in could not be completed. Please try again.';
     case 'session_expired':

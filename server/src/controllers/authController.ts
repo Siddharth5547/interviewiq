@@ -222,14 +222,6 @@ export const getOAuthStatus = async (_req: Request, res: Response): Promise<void
       clientId: process.env.GOOGLE_CLIENT_ID ? process.env.GOOGLE_CLIENT_ID.substring(0, 12) + '...' : null,
       requiredEnv: ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'GOOGLE_REDIRECT_URI'],
     },
-    apple: {
-      configured: !!(
-        process.env.APPLE_CLIENT_ID &&
-        (process.env.APPLE_PRIVATE_KEY || process.env.APPLE_KEY_ID || process.env.APPLE_CLIENT_SECRET)
-      ),
-      clientId: process.env.APPLE_CLIENT_ID ? process.env.APPLE_CLIENT_ID.substring(0, 12) + '...' : null,
-      requiredEnv: ['APPLE_CLIENT_ID', 'APPLE_TEAM_ID', 'APPLE_KEY_ID', 'APPLE_PRIVATE_KEY', 'APPLE_REDIRECT_URI'],
-    },
   });
 };
 
@@ -237,20 +229,19 @@ export const getOAuthStatus = async (_req: Request, res: Response): Promise<void
  * Generates a tamper-proof signed OAuth state parameter that is completely stateless
  * and survives across ephemeral serverless lambda instances on Vercel.
  */
-export const generateOAuthState = (provider: 'google' | 'apple', nonce?: string): string => {
+export const generateOAuthState = (provider: 'google' = 'google'): string => {
   const secret = process.env.JWT_SECRET || process.env.SESSION_SECRET || 'interviewiq_oauth_state_hmac_secret_2026';
   const payload = {
     p: provider,
     t: Date.now(),
     r: crypto.randomBytes(16).toString('hex'),
-    ...(nonce ? { n: nonce } : {}),
   };
   const payloadB64 = Buffer.from(JSON.stringify(payload)).toString('base64url');
   const signature = crypto.createHmac('sha256', secret).update(payloadB64).digest('base64url');
   const signedState = `${payloadB64}.${signature}`;
 
   // Also retain in memoryStore as an optional cache for local environments
-  memoryStore.oauthStates.set(signedState, { provider, nonce, createdAt: Date.now() });
+  memoryStore.oauthStates.set(signedState, { provider, createdAt: Date.now() });
 
   return signedState;
 };
@@ -259,7 +250,7 @@ export const generateOAuthState = (provider: 'google' | 'apple', nonce?: string)
  * Validates the OAuth state parameter statelessly using HMAC-SHA256 signature and timestamp,
  * with backwards-compatible fallback to memoryStore.
  */
-export const verifyOAuthState = (state: string, expectedProvider: 'google' | 'apple'): { valid: boolean; nonce?: string } => {
+export const verifyOAuthState = (state: string, expectedProvider: 'google' = 'google'): { valid: boolean } => {
   if (!state || typeof state !== 'string') return { valid: false };
 
   // 1. Stateless HMAC validation
@@ -278,7 +269,7 @@ export const verifyOAuthState = (state: string, expectedProvider: 'google' | 'ap
           const isTimeValid = typeof payload.t === 'number' && now >= payload.t && (now - payload.t) < 15 * 60 * 1000;
           const isProviderValid = payload.p === expectedProvider;
           if (isTimeValid && isProviderValid) {
-            return { valid: true, nonce: payload.n };
+            return { valid: true };
           }
         }
       } catch (err) {
@@ -291,7 +282,7 @@ export const verifyOAuthState = (state: string, expectedProvider: 'google' | 'ap
   const storedState = memoryStore.oauthStates.get(state);
   if (storedState && storedState.provider === expectedProvider && Date.now() - storedState.createdAt <= 15 * 60 * 1000) {
     memoryStore.oauthStates.delete(state);
-    return { valid: true, nonce: storedState.nonce };
+    return { valid: true };
   }
 
   return { valid: false };
@@ -329,33 +320,6 @@ export const getOAuthUrl = async (req: Request, res: Response): Promise<void> =>
     )}&redirect_uri=${encodeURIComponent(
       redirectUri
     )}&response_type=code&scope=openid%20email%20profile&state=${state}&access_type=offline&prompt=consent`;
-
-    res.json({ success: true, url: authUrl });
-    return;
-  }
-
-  if (provider === 'apple') {
-    const clientId = process.env.APPLE_CLIENT_ID;
-    const redirectUri = process.env.APPLE_REDIRECT_URI || `${getBackendUrl(req)}/api/auth/oauth/apple/callback`;
-
-    if (!clientId || !(process.env.APPLE_PRIVATE_KEY || process.env.APPLE_KEY_ID || process.env.APPLE_CLIENT_SECRET)) {
-      res.status(501).json({
-        success: false,
-        error: 'Apple Sign-In is not configured. Required server variables: APPLE_CLIENT_ID, APPLE_TEAM_ID, APPLE_KEY_ID, APPLE_PRIVATE_KEY, and APPLE_REDIRECT_URI.',
-        code: 'OAUTH_NOT_CONFIGURED',
-        requiredEnv: ['APPLE_CLIENT_ID', 'APPLE_TEAM_ID', 'APPLE_KEY_ID', 'APPLE_PRIVATE_KEY', 'APPLE_REDIRECT_URI'],
-      });
-      return;
-    }
-
-    const nonce = crypto.randomBytes(32).toString('hex');
-    const state = generateOAuthState('apple', nonce);
-
-    const authUrl = `https://appleid.apple.com/auth/authorize?client_id=${encodeURIComponent(
-      clientId
-    )}&redirect_uri=${encodeURIComponent(
-      redirectUri
-    )}&response_type=code%20id_token&scope=name%20email&response_mode=form_post&state=${state}&nonce=${nonce}`;
 
     res.json({ success: true, url: authUrl });
     return;
@@ -512,154 +476,6 @@ export const googleOAuthCallback = async (req: Request, res: Response): Promise<
   }
 };
 
-export const appleOAuthCallback = async (req: Request, res: Response): Promise<void> => {
-  const frontendUrl = getFrontendUrl(req);
-  const payload = { ...req.query, ...req.body };
-  const { code, id_token, state, user: userJson, error: appleError } = payload;
-
-  if (appleError) {
-    if (appleError === 'user_cancelled_authorize') {
-      res.redirect(`${frontendUrl}/login?error=oauth_cancelled`);
-    } else {
-      res.redirect(`${frontendUrl}/login?error=apple_failed`);
-    }
-    return;
-  }
-
-  if (!id_token || !state || typeof state !== 'string') {
-    res.redirect(`${frontendUrl}/login?error=apple_failed`);
-    return;
-  }
-
-  // Stateless CSRF validation
-  const stateVerification = verifyOAuthState(state, 'apple');
-  if (!stateVerification.valid) {
-    console.warn('[Apple OAuth] State verification failed for state parameter');
-    res.redirect(`${frontendUrl}/login?error=csrf_detected`);
-    return;
-  }
-  const expectedNonce = stateVerification.nonce;
-
-  try {
-    // Decode header without verifying to extract kid
-    const decodedToken = jwt.decode(id_token, { complete: true });
-    const kid = decodedToken?.header?.kid;
-    if (!kid) {
-      res.redirect(`${frontendUrl}/login?error=apple_failed`);
-      return;
-    }
-
-    // Fetch Apple JWKS
-    const jwksRes = await fetch('https://appleid.apple.com/auth/keys');
-    if (!jwksRes.ok) {
-      res.redirect(`${frontendUrl}/login?error=apple_failed`);
-      return;
-    }
-    const jwks = await jwksRes.json() as { keys: any[] };
-    const matchingKey = jwks.keys.find((k: any) => k.kid === kid);
-
-    if (!matchingKey) {
-      res.redirect(`${frontendUrl}/login?error=apple_failed`);
-      return;
-    }
-
-    // Convert JWK to PEM public key using native Node.js crypto
-    const pubKey = crypto.createPublicKey({ key: matchingKey, format: 'jwk' });
-    const pem = pubKey.export({ type: 'spki', format: 'pem' });
-
-    // Cryptographically verify token
-    const appleClientId = process.env.APPLE_CLIENT_ID;
-    const verified = jwt.verify(id_token, pem, {
-      algorithms: ['RS256'],
-      issuer: 'https://appleid.apple.com',
-      audience: appleClientId,
-    }) as any;
-
-    if (expectedNonce && verified.nonce !== expectedNonce) {
-      console.error('[Apple OAuth] Nonce mismatch');
-      res.redirect(`${frontendUrl}/login?error=csrf_detected`);
-      return;
-    }
-
-    const email = verified.email;
-    const appleId = verified.sub;
-
-    if (!email) {
-      res.redirect(`${frontendUrl}/login?error=apple_failed`);
-      return;
-    }
-
-    // Extract user full name if supplied by Apple on first authorization
-    let fullName = 'Apple Candidate';
-    if (userJson) {
-      try {
-        const parsed = typeof userJson === 'string' ? JSON.parse(userJson) : userJson;
-        const candidateName = `${parsed.name?.firstName || ''} ${parsed.name?.lastName || ''}`.trim();
-        if (candidateName) fullName = candidateName;
-      } catch {
-        // use fallback
-      }
-    }
-
-    const normalizedEmail = email.toLowerCase().trim();
-    const { fallbackStoreActive } = getDBStatus();
-    let user: any = null;
-
-    if (!fallbackStoreActive) {
-      user = await UserModel.findOne({ email: normalizedEmail });
-      if (user) {
-        if (!user.appleId) user.appleId = appleId;
-        await user.save();
-      } else {
-        user = await UserModel.create({
-          email: normalizedEmail,
-          fullName,
-          authProvider: 'apple',
-          appleId,
-          targetRole: 'Software Engineer',
-        });
-      }
-    } else {
-      user = memoryStore.users.get(normalizedEmail);
-      if (user) {
-        user.appleId = appleId;
-        memoryStore.users.set(normalizedEmail, user);
-      } else {
-        const id = memoryStore.generateId();
-        user = {
-          _id: id,
-          id,
-          email: normalizedEmail,
-          fullName,
-          authProvider: 'apple',
-          appleId,
-          targetRole: 'Software Engineer',
-          createdAt: new Date(),
-        };
-        memoryStore.users.set(normalizedEmail, user);
-      }
-    }
-
-    const userId = user._id ? user._id.toString() : user.id;
-    const token = jwt.sign({ userId, email: normalizedEmail }, JWT_SECRET, { expiresIn: '7d' });
-
-    // Set production-ready cookie
-    const isProd = process.env.NODE_ENV === 'production' || req.headers['x-forwarded-proto'] === 'https';
-    res.cookie('interviewiq_token', token, {
-      httpOnly: false,
-      secure: isProd,
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      path: '/',
-    });
-
-    res.redirect(`${frontendUrl}/dashboard?token=${encodeURIComponent(token)}`);
-  } catch (error: any) {
-    console.error('[Apple OAuth Error]:', error);
-    res.redirect(`${frontendUrl}/login?error=apple_failed`);
-  }
-};
-
 export const googleAuth = async (req: Request, res: Response): Promise<void> => {
   const { credential } = req.body;
   const clientId = process.env.GOOGLE_CLIENT_ID;
@@ -686,24 +502,6 @@ export const googleAuth = async (req: Request, res: Response): Promise<void> => 
   res.status(501).json({
     success: false,
     error: 'Google credential verification endpoint ready. Waiting for live Google verification callback.',
-  });
-};
-
-export const appleAuth = async (_req: Request, res: Response): Promise<void> => {
-  const clientId = process.env.APPLE_CLIENT_ID;
-  if (!clientId || !process.env.APPLE_CLIENT_SECRET) {
-    res.status(501).json({
-      success: false,
-      error: 'Apple Sign-In is not configured. Please supply APPLE_CLIENT_ID, APPLE_TEAM_ID, APPLE_KEY_ID, APPLE_PRIVATE_KEY, and APPLE_REDIRECT_URI in server/.env.',
-      code: 'OAUTH_NOT_CONFIGURED',
-      requiredEnv: ['APPLE_CLIENT_ID', 'APPLE_TEAM_ID', 'APPLE_KEY_ID', 'APPLE_PRIVATE_KEY', 'APPLE_REDIRECT_URI'],
-    });
-    return;
-  }
-
-  res.status(501).json({
-    success: false,
-    error: 'Apple Sign-In endpoint ready.',
   });
 };
 

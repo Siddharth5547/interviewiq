@@ -8,8 +8,6 @@ import {
   getOAuthUrl,
   googleAuth,
   googleOAuthCallback,
-  appleAuth,
-  appleOAuthCallback,
   forgotPassword,
   resetPassword,
 } from '../controllers/authController.js';
@@ -25,10 +23,7 @@ router.get('/oauth/status', getOAuthStatus);
 router.get('/oauth/:provider/url', getOAuthUrl);
 router.get('/oauth/google/callback', googleOAuthCallback);
 router.post('/oauth/google/callback', googleOAuthCallback);
-router.get('/oauth/apple/callback', appleOAuthCallback);
-router.post('/oauth/apple/callback', appleOAuthCallback);
 router.post('/oauth/google', googleAuth);
-router.post('/oauth/apple', appleAuth);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
 

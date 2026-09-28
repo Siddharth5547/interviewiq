@@ -13,7 +13,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [appleLoading, setAppleLoading] = useState(false);
   const [error, setError] = useState('');
 
   // Forgot Password View State
@@ -52,29 +51,22 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
     }
   };
 
-  const handleSSOClick = async (provider: 'Google' | 'Apple') => {
-    if (googleLoading || appleLoading) return;
+  const handleGoogleLogin = async () => {
+    if (googleLoading) return;
     setError('');
     clearAuthError();
-
-    if (provider === 'Google') setGoogleLoading(true);
-    if (provider === 'Apple') setAppleLoading(true);
+    setGoogleLoading(true);
 
     try {
-      const res = await api.getOAuthUrl(provider.toLowerCase());
+      const res = await api.getOAuthUrl('google');
       if (res.data?.success && res.data?.url) {
         window.location.href = res.data.url;
         return;
       }
     } catch (err: any) {
-      if (provider === 'Google') {
-        setError('Google sign-in is temporarily unavailable. Please try again or use email.');
-      } else {
-        setError('Apple sign-in is temporarily unavailable. Please try again or use email.');
-      }
+      setError('Google sign-in is temporarily unavailable. Please try again or use email.');
     } finally {
       setGoogleLoading(false);
-      setAppleLoading(false);
     }
   };
 
@@ -251,8 +243,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
             <div className="space-y-2.5">
               <button
                 type="button"
-                onClick={() => handleSSOClick('Google')}
-                disabled={googleLoading || appleLoading || loading}
+                onClick={handleGoogleLogin}
+                disabled={googleLoading || loading}
                 className="w-full py-2.5 px-4 rounded-full border border-[#344E41]/15 bg-white hover:bg-[#F4F7F1] text-xs font-semibold text-[#344E41] transition-all flex items-center justify-center gap-2.5 shadow-2xs disabled:opacity-70"
               >
                 {googleLoading ? (
@@ -281,27 +273,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
                       />
                     </svg>
                     <span>Continue with Google</span>
-                  </>
-                )}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleSSOClick('Apple')}
-                disabled={googleLoading || appleLoading || loading}
-                className="w-full py-2.5 px-4 rounded-full border border-[#344E41]/15 bg-white hover:bg-[#F4F7F1] text-xs font-semibold text-[#344E41] transition-all flex items-center justify-center gap-2.5 shadow-2xs disabled:opacity-70"
-              >
-                {appleLoading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin text-[#1F2A22]" />
-                    <span>Connecting to Apple...</span>
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-4 h-4 fill-current text-[#1F2A22]" viewBox="0 0 24 24">
-                      <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.63-.79 1.07-1.89.94-3-.94.04-2.07.63-2.73 1.42-.58.68-1.09 1.79-.95 2.87 1.06.08 2.12-.53 2.74-1.29z" />
-                    </svg>
-                    <span>Continue with Apple</span>
                   </>
                 )}
               </button>
@@ -374,7 +345,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
 
               <button
                 type="submit"
-                disabled={loading || googleLoading || appleLoading}
+                disabled={loading || googleLoading}
                 className="w-full py-3 px-5 rounded-full bg-[#344E41] text-white font-semibold text-xs sm:text-sm hover:bg-[#25392F] transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-70 mt-2 cursor-pointer"
               >
                 {loading ? (

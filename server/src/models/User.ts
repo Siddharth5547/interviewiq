@@ -5,9 +5,8 @@ export interface IUser extends Document {
   passwordHash?: string;
   fullName: string;
   targetRole?: string;
-  authProvider: 'local' | 'google' | 'apple';
+  authProvider: 'local' | 'google';
   googleId?: string;
-  appleId?: string;
   avatarUrl?: string;
   resetPasswordToken?: string;
   resetPasswordExpires?: Date;
@@ -21,9 +20,8 @@ const UserSchema: Schema = new Schema(
     passwordHash: { type: String, required: false },
     fullName: { type: String, required: true, trim: true },
     targetRole: { type: String, default: 'Software Engineer' },
-    authProvider: { type: String, enum: ['local', 'google', 'apple'], default: 'local' },
+    authProvider: { type: String, enum: ['local', 'google'], default: 'local' },
     googleId: { type: String, sparse: true },
-    appleId: { type: String, sparse: true },
     avatarUrl: { type: String },
     resetPasswordToken: { type: String, select: false },
     resetPasswordExpires: { type: Date, select: false },
